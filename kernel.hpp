@@ -142,8 +142,7 @@ namespace Gomu{
   void type_del(void*);
   void* type_copy(void*);
   int type_comp(void*,void*);
-  //  Value* getType(Value*,Context*);
-
+  
   //------
   // Void
   //------
