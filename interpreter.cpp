@@ -262,7 +262,7 @@ namespace Gomu{
       ContextError("There is no symbol named "+name);
     Value* args[max_arguments_number];
     size_t nargs=set_arguments(current,nodes,args);
-    eval_function(symbol,args,nargs);
+    current.value=eval_function(symbol,args,nargs);
   }
 
   //------------------------------------------------
