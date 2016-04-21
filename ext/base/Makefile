@@ -7,8 +7,9 @@ all: $(MOD)
 %.o:%.cpp %.hpp
 	$(CPP) -c $< -o $@
 
-$(MOD): init.cpp array.o string.o module.o
+$(MOD): init.cpp array.o kernel.o module.o string.o
 	$(CPP) -shared  $(LDFLAGS) $^ -o $@
 
 clean:
+	-$(RM) *~
 	-$(RM) $(MOD) *.o

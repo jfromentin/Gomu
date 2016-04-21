@@ -1,55 +1,34 @@
-#include "../../interpreter.hpp"
-#include "array.hpp"
-#include "string.hpp"
-#include "module.hpp"
+/**
+ * This file is part of Gomu.
+ *
+ *  Copyright 2016 by Jean Fromentin <jean.fromentin@math.cnrs.fr>
+ *
+ * Gomu is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Gomu is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Gomu. If not, see <http://www.gnu.org/licenses/>. 
+ */
 
-using namespace std;
-
-Value type(Context&,Value& v){
-  if(v.type==type_symbol) return Value(type_type,((Value*)v.ptr)->type); 
-  else return Value(type_type,v.type);
-}
-
-Value del(Context&,Value& v){
-  ((Value*)v.ptr)->del();  
-  ((Value*)v.ptr)->type=type_void;
-  return Value(type_void,nullptr);
-}
-
-
-
- Value assignment(Context& context,Value& lhs,Value& rhs){
-    Value* rhse=rhs.eval();
-    if(lhs.ptr!=nullptr){
-      //Prevent auto assignement
-      if(((Value*)lhs.ptr)->ptr==rhse->ptr) return rhs;
-      Symbol* symbol=(Symbol*)lhs.ptr;
-      if(symbol->locked) ContextError("The symbol is locked");
-      ((Value*)lhs.ptr)->del();
-    }
-    if(rhs.type==type_symbol){
-      copyValue((Value*)lhs.ptr,rhse);
-    }
-    else{
-      ((Value*)lhs.ptr)->type=rhs.type;
-      ((Value*)lhs.ptr)->ptr=rhs.ptr;
-      rhs.type=type_void;
-      rhs.ptr=nullptr;
-    }
-    return lhs;
-  }
+#include "init.hpp"
 
 extern "C"{
   
   Gomu::Type types[]={
     TYPE_SENTINEL
   };
-
  
   //--- Functions ---//
   Gomu::Module::Function functions[]={
     {"Integer","len",{"String"},(void*)string_len},
-    //{"Integer","len",{"Array"},(void*)array_len},
+    {"Integer","len",{"Array"},(void*)array_len},
     FUNC_SENTINEL
   };
   
@@ -60,12 +39,13 @@ extern "C"{
     FUNC_SENTINEL
   };
   
-  //--- Meta functions ---//
+  //--- Contextual functions ---//
   Gomu::Module::Function contextual_functions[]={
-    {"Type","type",{"Generic"},(void*)type},
-    {"Generic","operator=",{"Symbol","Generic"},(void*)assignment},
     {"Void","delete",{"Symbol"},(void*)del},
+    //{"Void","load",{"String"},(void*)load},
+    {"Generic","operator=",{"Symbol","Generic"},(void*)assignment},
     {"Array","symbols",{"Type"},(void*)symbols},
+    {"Type","type",{"Generic"},(void*)type},
     FUNC_SENTINEL
   };
 }
