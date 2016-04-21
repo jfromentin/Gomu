@@ -48,6 +48,7 @@ int main(){
   completion_interpreter=&interpreter;
   try{
     init_kernel(context,interpreter);
+    context.load_module("base");
   }
   catch(Error err){
     err.disp(cout,"");
