@@ -608,7 +608,7 @@ namespace Gomu{
     //we postpone the unload of module->types
     
     //** Load the new version of the library
-    string filename="modules/"+module->name+".so";
+    string filename="ext/"+module->name+".so";
     void* handle=dlopen(filename.c_str(),RTLD_NOW);
     if(not handle){
       handle=nullptr;
