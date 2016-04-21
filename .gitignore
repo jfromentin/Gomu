@@ -1,3 +1,9 @@
+#Documentation
+doc/*
+
+#Modules
+modules/*
+
 # Compiled Object files
 *.slo
 *.lo
