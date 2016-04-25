@@ -146,11 +146,14 @@ namespace Gomu{
   //! A class for the interpretation context
   class Context{
   public:
+    //! Pointer to an interpreter
+    Interpreter* interpreter;
+    
     //! Map for association name <-> symbol
     map<string,Symbol> symbols;
     
     //! The unique constructor
-    Context();
+    Context(Interpreter* interpreter);
 
     //! Add a symbol for a contextual function
     //! \param name name of the symbol
@@ -474,7 +477,8 @@ namespace Gomu{
     //! Evaluate a command
     //! \param cmd command to evaluate
     //! \param context context of the evaluation
-    void eval(string cmd,Context& context);
+    //! \param display specify if we display the last valus
+    void eval(string cmd,Context& context,bool display=true);
 
     //! Evaluate an expression
     //! \param pos indice of the expression to evaluate

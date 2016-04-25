@@ -19,6 +19,9 @@
 
 #include "kernel.hpp"
 #include "../../interpreter.hpp"
+#include <fstream>
+
+
 
 //------------------------------------
 // assignment(Context&,Value&,Value&)
@@ -55,6 +58,24 @@ Value del(Context&,Value& v){
   return Value(type_void,nullptr);
 }
 
+//--------------------------
+// execute(Context&,Value&)
+//--------------------------
+
+Value execute(Context& context,Value& file){
+  const string &filename="worksheet/"+*((string*)file.ptr);
+  ifstream fs;
+  fs.open(filename.c_str(),fstream::in);
+  string cmd;
+  size_t line=1;
+  while(getline(fs,cmd)){
+    context.interpreter->eval(cmd,context,false);
+  }
+  fs.close();
+  return Value(type_void,nullptr);
+
+}
+
 //---------
 // symbols
 //---------
@@ -72,7 +93,7 @@ Value symbols(Context& context,Value& v){
   res->type=type_string;
   for(size_t i=0;i<stack.size();++i){
     res->tab[i]=new string(stack[i]);
-  }
+    }
   return Value(type_array,res);
 }
 
@@ -84,4 +105,5 @@ Value type(Context&,Value& v){
   if(v.type==type_symbol) return Value(type_type,((Value*)v.ptr)->type); 
   else return Value(type_type,v.type);
 }
+
 

@@ -42,8 +42,8 @@ static char* completion_generator(const char* str,int state);
 
 //! Main function
 int main(){
-  Context context;
   Interpreter interpreter;
+  Context context(&interpreter);
   completion_context=&context;
   completion_interpreter=&interpreter;
   try{

@@ -34,3 +34,6 @@ Value type(Context&,Value&);
 
 //! Return an array of member functions of a type
 Value symbols(Context&,Value&);
+
+//! Execute commands strored in a file
+Value execute(Context&, Value&);

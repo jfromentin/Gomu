@@ -49,7 +49,8 @@ namespace Gomu{
   // Context::Context()
   //--------------------
   
-  Context::Context(){
+  Context::Context(Interpreter* inter){
+    interpreter=inter;
     add_symbol("context",type_context,this)->hide=true;
     add_symbol("Array",type_type,type_array);
     add_symbol("Boolean",type_type,type_boolean)->hide=true;
@@ -1116,7 +1117,7 @@ namespace Gomu{
   // Interpreter::eval(string)
   //---------------------------
   
-  void Interpreter::eval(string cmd,Context& context){
+  void Interpreter::eval(string cmd,Context& context,bool display){
     size_t root;
     Node* node;
     bool error=false;
@@ -1127,7 +1128,7 @@ namespace Gomu{
       eval_expression(root,context);
       node=&nodes[root];
       Value* value=node->value.eval();
-      if(value->type!=nullptr and value->type!=type_void){
+      if(value->type!=nullptr and value->type!=type_void and display){
 	cout<<value->disp()<<endl;
       }
     }

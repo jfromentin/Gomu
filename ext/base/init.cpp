@@ -42,7 +42,7 @@ extern "C"{
   //--- Contextual functions ---//
   Gomu::Module::Function contextual_functions[]={
     {"Void","delete",{"Symbol"},(void*)del},
-    //{"Void","load",{"String"},(void*)load},
+    {"Void","execute",{"String"},(void*)execute},
     {"Generic","operator=",{"Symbol","Generic"},(void*)assignment},
     {"Array","symbols",{"Type"},(void*)symbols},
     {"Type","type",{"Generic"},(void*)type},
