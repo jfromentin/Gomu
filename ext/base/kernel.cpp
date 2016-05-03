@@ -17,11 +17,9 @@
  * along with Gomu. If not, see <http://www.gnu.org/licenses/>. 
  */
 
+#include <fstream>
 #include "kernel.hpp"
 #include "../../interpreter.hpp"
-#include <fstream>
-
-
 
 //------------------------------------
 // assignment(Context&,Value&,Value&)
@@ -34,7 +32,7 @@ Value assignment(Context& context,Value& lhs,Value& rhs){
     if(((Value*)lhs.ptr)->ptr==rhse->ptr) return rhs;
     Symbol* symbol=(Symbol*)lhs.ptr;
     if(symbol->locked) ContextError("The symbol is locked");
-    ((Value*)lhs.ptr)->del();
+    ((Value*)lhs.ptr)->pdel();
   }
   if(rhs.type==type_symbol){
     copyValue((Value*)lhs.ptr,rhse);
@@ -53,7 +51,7 @@ Value assignment(Context& context,Value& lhs,Value& rhs){
 //----------------------
 
 Value del(Context&,Value& v){
-  ((Value*)v.ptr)->del();  
+  ((Value*)v.ptr)->pdel();  
   ((Value*)v.ptr)->type=type_void;
   return Value(type_void,nullptr);
 }
@@ -68,8 +66,22 @@ Value execute(Context& context,Value& file){
   fs.open(filename.c_str(),fstream::in);
   string cmd;
   size_t line=1;
-  while(getline(fs,cmd)){
-    context.interpreter->eval(cmd,context,false);
+  bool error=false;
+  Value* res;
+  while(not error and getline(fs,cmd)){
+    try{
+      res=context.interpreter->eval_basic(cmd,context);
+    }
+    catch(Error err){
+      error=true;
+      context.interpreter->purge_tree();
+      cout<<"Line "<<line<<" : ";
+      err.disp(cout,cmd);
+      cout<<endl;
+    }
+    if(not error){
+      res->pdel();
+    }
   }
   fs.close();
   return Value(type_void,nullptr);
@@ -80,7 +92,7 @@ Value execute(Context& context,Value& file){
 // symbols
 //---------
 
-Value symbols(Context& context,Value& v){
+Value member_symbols(Context& context,Value& v){
   Type* type=(Type*)v.ptr;
   string str=type->name+'.';
   deque<string> stack;
@@ -107,3 +119,20 @@ Value type(Context&,Value& v){
 }
 
 
+//-------------------------------
+// equal(Context&,Value&,Value&)
+//-------------------------------
+
+Value equality(Context&,Value& v1,Value& v2){
+  Value res;
+  res.type=type_boolean;
+  Value* a=v1.eval();
+  Value* b=v2.eval();
+  if(a->type!=b->type){
+    res.ptr=to_boolean(false);
+    return res;
+  }
+  Type* type=a->type;
+  res.ptr=to_boolean(type->comp(a->ptr,b->ptr)==0);
+  return res;
+}

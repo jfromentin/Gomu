@@ -43,8 +43,8 @@ typedef int64_t int64;
 #define FUNC(f) (void*)(f)
 #define CONT_FUNC_SENTINEL {"",{""},nullptr}
 #define FUNC_SENTINEL {"","",{""},nullptr}
+#define SYMB_SENTINEL {"","",nullptr}
 #define TYPE_SENTINEL {"",nullptr,nullptr,nullptr,nullptr}
-
 
 #define SyntaxError(msg,first,last) throw Error(errSyntax,(msg),(first),(last),__FILE__,__LINE__,__PRETTY_FUNCTION__);
 #define Bug(msg) throw Gomu::Error(Gomu::errBug,(msg),0,0,__FILE__,__LINE__,__PRETTY_FUNCTION__);
@@ -119,7 +119,6 @@ namespace Gomu{
   //! Class for array of value of same type
   class  ArrayValue{
   public:
-
     //! size of the array
     size_t size;
     //! type of stored values
@@ -170,7 +169,9 @@ namespace Gomu{
   public:
     
     class Function;
-
+    class Symbol;
+    class Type;
+    
     //! Name of the module
     string name;
     
@@ -186,6 +187,9 @@ namespace Gomu{
     //! Number of defined contextual functions
     size_t ncfunc;
 
+    //! Nomber of defined symbols
+    size_t nsymb;
+
     //! Handle to the dinamic library object associated to the module
     void* handle;
 
@@ -200,6 +204,9 @@ namespace Gomu{
 
     //! Defined contextual function
     Function* contextual_functions;
+
+    //! Defined symbols
+    Symbol* symbols;
     
     //! Destructor
     ~Module();
@@ -209,7 +216,7 @@ namespace Gomu{
 
     //! Init module from types
     //! \param types types defined in the library
-    void init(Type* types);
+    void init(Module::Type* types);
   };
 
   //------------------
@@ -219,7 +226,6 @@ namespace Gomu{
   //! Class for the module function declarations
   class Module::Function{
   public:
-    
     //! Returned type
     string tr;
 
@@ -234,6 +240,52 @@ namespace Gomu{
 
     //! Specify if the function is loaded or not
     bool loaded;
+  };
+
+  //----------------
+  // Module::Symbol 
+  //----------------
+
+  //! Class for the module symbol declarations
+  class Module::Symbol{
+  public:
+    //! Name of the symbol
+    string name;
+
+    //! Typre of the symbol
+    string type;
+
+    //! Pointer to the C++ data
+    void* ptr;
+
+    //! Specify if the symbol is loaded or not
+    bool loaded;
+  };
+
+  //--------------
+  // Module::Type
+  //--------------
+
+  //! Class for the module type declarations
+  class Module::Type{
+  public:
+    //! Name of the type
+    string name;
+
+    //! Display function of the type
+    DispFunc disp;
+
+    //! Delete function of the type
+    DelFunc del;
+
+    //! Copy function of the type
+    CopyFunc copy;
+
+    //! Compeare function of the type
+    CompFunc comp;
+
+    //! Poniter to the type
+    Gomu::Type** ptr;
   };
   
   //--------------
@@ -299,23 +351,32 @@ namespace Gomu{
   //! Class for type
   class Type{
   public:
-    
     //! Name of the type
     string name;
+
     //! Display function of the type
     DispFunc disp;
+
     //! Delete function of the type
     DelFunc del;
+
     //! Copy function of the type
     CopyFunc copy;
+
     //! Compeare function of the type
     CompFunc comp;
+
     //! Empty constructor
     Type();
+
     //! Full constructor
     Type(string,DispFunc disp,DelFunc del,CopyFunc copy,CompFunc comp);
+
     //! Recopy constructor
     Type(const Type&);
+
+    //! Construct a type from a Module::Type
+    Type(const Module::Type&);
   };
 
   //-------
@@ -340,8 +401,8 @@ namespace Gomu{
     //! \param ptr pointer to C++ value
     Value(Type* type,void* ptr);
     
-    //! Delete the current value
-    void del();
+    //! Delete the current value with protextions
+    void pdel();
     
     //! Display the current value
     //! \return a string of the diplay
@@ -360,14 +421,19 @@ namespace Gomu{
   //***********************
 
   //! Return an slong from a value ptr
-  uint64 get_slong(void* v);
-
+  int64 get_slong(void* v);
+  
   //! Return a value ptr for a bool 
   void* to_boolean(bool n);
 
   //! Return a value ptr from a slong integer
   void* to_integer(slong s);
 
+  //! Undefined copy function for type
+  void* no_copy(void*);
+
+  //! Undefined compare function for type
+  int no_comp(void*,void*);
 
   //**********************
   //* Inline definitions *
@@ -426,10 +492,12 @@ namespace Gomu{
   Value::Value(Type* t,void* p):type(t),ptr(p){}
 
   inline void
-  Value::del(){
-    if(ptr!=nullptr and type!=nullptr){
+  Value::pdel(){
+    if(ptr!=nullptr and type!=nullptr and type!=type_symbol){
+      // cout<<"Delete value of type "<<type->name<<endl;
       type->del(ptr);
     }
+    ptr=nullptr;
   }
 
   inline Value*
@@ -437,7 +505,11 @@ namespace Gomu{
     if(type!=type_symbol) return this;
     return (Value*)ptr;
   }
-   
+
+  //---------------------
+  // Auxiliary Functions
+  //---------------------
+
 }
 
 

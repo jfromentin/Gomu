@@ -33,7 +33,7 @@ using namespace std;
 //! Class for array
 template <class T>
 class Array{
- protected:
+public:
 
   //! Size of the array
   size_t s;
@@ -42,14 +42,12 @@ class Array{
   //! Construct an array from a c++ array a of size s and own it
   Array(T* a,size_t s);
 
-public:
-
   //! Contruct an array of size s
   //! \param s size of the array
   Array(size_t s=0);
   
   //! Construct an array from an initialization list
-   Array(const initializer_list<T>& list);
+  Array(const initializer_list<T>& list);
     
   //! The copy contructor
   Array(const Array<T>&);
@@ -73,19 +71,20 @@ public:
   //! \param array Array to copy
   Array& operator=(const Array& array);
 
-  
-  //! Assignement operator with move
+    //! Assignement operator with move
   //! \param array Array to move
   Array& operator=(Array&& array);
-
   
   //! Test is the array is empty
   //! \return true if empty flase otherwise 
   bool is_empty() const;
     
   //! Return the size of the array$
-    size_t size() const;
-    
+  size_t size() const;
+   
+  //! Display the array in a string
+  string to_string() const;
+  
   //! Return a pointer to the begin of the array
   const T* begin() const;
     
@@ -122,24 +121,57 @@ public:
   //! \param return a reference to the value at index i
   T& operator[](size_t i);
 
-  
-  //! Comparison function
+  //! Operator<
   bool operator<(const Array& array) const;
-   
-  //! Display function
-  template<class U> friend std::ostream& operator<<(std::ostream& os,const Array<U>&);
 
+  //! Append an array to the current one
+  Array append(const Array& array) const;
+    
 };
+
+//***********************
+//* Auxiliary functions *
+//***********************
+
+//! Comparison function for int16_t
+//! \param x a int16_t
+//! \param y a int16_t
+//! \return -1 is x<y, 0 if x==y and 1 is x>y
+int cmp(int16_t x,int16_t y);
+
+//! Comparison function for Array
+//! \param A an Array
+//! \param B an Array
+//! \return -1 is A<B, 0 if A==B and 1 is A>B
+template<class T> int cmp(const Array<T>& A,const Array<T>& B);
+
+//! Operator<< for Array
+template<class T> ostream& operator<<(std::ostream& os,const Array<T>&);
+
+//! to_string function for Array
+template<class T> string to_string(const Array<T>&);
 
 //*************************
 //* Function declarations *
 //*************************
 
+//----------------------
+// Array::Array(size_t)
+//----------------------
+
 template<class T> inline
 Array<T>::Array(size_t _s):s(_s),array(new T[_s]){}
 
+//-------------------------
+// Array::Array(T*,size_t)
+//-------------------------
+
 template<class T> inline
 Array<T>::Array(T* a,size_t _s):s(_s),array(a){}
+
+//----------------------------------------
+// Array::Array(const initializer_list<T>
+//----------------------------------------
 
 template<class T> 
 Array<T>::Array(const initializer_list<T> &list):s((int)list.size()),array(new T[s]){
@@ -150,16 +182,28 @@ Array<T>::Array(const initializer_list<T> &list):s((int)list.size()),array(new T
   }
 }
 
+//------------------------------
+// Array::Array(const Array<T>&
+//------------------------------
+
 template<class T> inline
 Array<T>::Array(const Array<T>& a):s(a.s),array(new T[s]){
   memcpy(array,a.array,s*sizeof(T));
 }
+
+//-------------------
+// Array::Array<T>&&
+//-------------------
 
 template<class T> inline
 Array<T>::Array(Array<T>&& a):s(a.s),array(a.array){
   a.s=0;
   a.array=nullptr;
 }
+
+//------------------------------
+// Array::Array(const list<T>&)
+//------------------------------
 
 template<class T> 
 Array<T>::Array(const list<T>& l):s((int)l.size()),array(new T[s]){
@@ -169,6 +213,10 @@ Array<T>::Array(const list<T>& l):s((int)l.size()),array(new T[s]){
     ++ptr;
   }
 }
+
+//-------------------------
+// Array::Array(stack<T>&)
+//-------------------------
 
 template<class T> 
 Array<T>::Array(stack<T>& stack):s(stack.size()),array(new T[s]){
@@ -180,6 +228,10 @@ Array<T>::Array(stack<T>& stack):s(stack.size()),array(new T[s]){
   }
 }
 
+//-----------------------------
+// Array::Array(const set<T>&)
+//-----------------------------
+
 template<class T> 
 Array<T>::Array(const set<T>& l):s(l.size()),array(new T[s]){
   T* ptr=array;
@@ -189,10 +241,18 @@ Array<T>::Array(const set<T>& l):s(l.size()),array(new T[s]){
   }
 }
 
+//-----------------
+// Array::~Array()
+//-----------------
+
 template<class T> inline
 Array<T>::~Array(){
   if(array!=nullptr) delete[] array;
 }
+
+//-----------------------------------
+// Array::operator=(const Array<T>&)
+//-----------------------------------
 
 template<class T> Array<T>&
 Array<T>::operator=(const Array<T>& a){
@@ -207,6 +267,10 @@ Array<T>::operator=(const Array<T>& a){
   return *this;
 }
 
+//------------------------------
+// Array::operator=(Array<T>&&)
+//------------------------------
+
 template<class T>  Array<T>&
 Array<T>::operator=(Array<T>&& a){
   if(this!=&a){
@@ -219,25 +283,60 @@ Array<T>::operator=(Array<T>&& a){
   return *this;
 }
 
+//-------------------
+// Array::is_empty()
+//-------------------
+
 template<class T> inline bool
 Array<T>::is_empty() const{
   return s==0;
 }
+
+//---------------
+// Array::size()
+//---------------
 
 template<class T> inline size_t
 Array<T>::size() const{
   return s;
 }
 
+//------------------
+// Array::to_string()
+//------------------
+
+template<class T> string
+Array<T>::to_string() const{
+  if(s==0) return "()";
+  string res="("+std::to_string(read(0));
+  for(size_t i=1;i<s;++i){
+    res+=',';
+    res+=std::to_string(read(i));
+  }
+  return res+")";
+}
+
+//----------------
+// Array::begin()
+//----------------
+
 template<class T> inline const T*
 Array<T>::begin() const{
   return array;
 }
 
+//--------------
+// Array::end()
+//--------------
+
 template<class T> inline const T*
 Array<T>::end() const{
   return array+s;
 }
+
+//-------------------------------
+// Array::write(size_t,const T&)
+//-------------------------------
 
 template<class T> inline void
 Array<T>::write(size_t i,const T& v){
@@ -245,11 +344,19 @@ Array<T>::write(size_t i,const T& v){
   array[i]=v;
 }
 
+//---------------------
+// Array::read(size_t)
+//---------------------
+
 template<class T> inline T&
 Array<T>::read(size_t i) const{
   assert(i<s);
   return array[i];
 }
+
+//-------------------
+// Array::at(size_t)
+//-------------------
 
 template<class T> inline const T&
 Array<T>::at(size_t i) const{
@@ -263,6 +370,10 @@ Array<T>::at(size_t i){
   return array[i];
 }
 
+//---------------------------
+// Array::operator[](size_t)
+//---------------------------
+
 template<class T> inline const T&
 Array<T>::operator[](size_t i) const{
   assert(i<s);
@@ -275,6 +386,22 @@ Array<T>::operator[](size_t i){
   return array[i];
 }
 
+//-----------------------------
+// Array::append(const Array&)
+//-----------------------------
+
+template<class T> Array<T>
+Array<T>::append(const Array<T>& arr) const{
+  Array<T> res(s+arr.s);
+  memcpy(res.array,array,s*sizeof(T));
+  memcpy(&res.array[s],arr.array,arr.s*sizeof(T));
+  return res;
+}
+
+//--------------------------------
+// Array::operator<(const Array&)
+//--------------------------------
+
 template<class T> bool
 Array<T>::operator<(const Array<T>& arr) const{
   if(s==arr.s){
@@ -285,6 +412,53 @@ Array<T>::operator<(const Array<T>& arr) const{
   }
   return s<arr.s;
 }
+
+
+//***********************
+//* Auxiliary functions *
+//***********************
+
+//--------------------------
+// cmp(int16_t x,int16_t y)
+//--------------------------
+
+inline int
+cmp(int16_t x,int16_t y){
+  if(x<y) return -1;
+  if(x==y) return 0;
+  return 1;
+}
+
+//------------------------------------
+// cmp(const Array& A,const Array& B)
+//------------------------------------
+
+
+template<class T> int
+cmp(const Array<T>& A,const Array<T>& B){
+  if(A.s==B.s){
+    for(size_t i=0;i<A.s;++i){
+      int c=cmp(A.read(i),B.read(i));
+      if(c!=0) return c;
+    }
+    return 0;
+  }
+  if(A.s<B.s) return -1;
+  return 1;
+}
+
+//----------------------------
+// to_string(const Array<T>&)
+//----------------------------
+
+template<class T> inline string
+to_string(const Array<T>& arr){
+  return arr.to_string();
+}
+
+//-------------------------------------------
+// operator<<(ostram&,const Array<uint8_t>&)
+//-------------------------------------------
 
 inline ostream& 
 operator<<(ostream& os,const Array<uint8_t>& a){
@@ -297,6 +471,10 @@ operator<<(ostream& os,const Array<uint8_t>& a){
   return os<<']'; 
 }
 
+//------------------------------------------
+// operator<<(ostram&,const Array<int8_t>&)
+//------------------------------------------
+
 inline ostream& 
 operator<<(ostream& os,const Array<int8_t>& a){
   os<<'[';
@@ -307,6 +485,10 @@ operator<<(ostream& os,const Array<int8_t>& a){
   }
   return os<<']'; 
 }
+
+//------------------------------------------
+// operator<<(ostram&,const Array<int8_t>&)
+//------------------------------------------
 
 template<class T> ostream& 
 operator<<(ostream& os,const Array<T>& a){

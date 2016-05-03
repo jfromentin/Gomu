@@ -22,6 +22,9 @@
 
 using namespace Gomu;
 
+//! Run ckeck of a mofule
+Value module_check(Context&,Value&);
+
 //! Return types defined in a module
 void* module_types(void*);
 

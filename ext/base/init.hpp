@@ -21,4 +21,5 @@
 #include "array.hpp"
 #include "kernel.hpp"
 #include "module.hpp"
+#include "integer.hpp"
 #include "string.hpp"

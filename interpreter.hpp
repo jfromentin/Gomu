@@ -64,9 +64,24 @@ namespace Gomu{
   typedef Value (*CFunc0)(Context&);
   typedef Value (*CFunc1)(Context&,Value&);
   typedef Value (*CFunc2)(Context&,Value&,Value&);
-
+  typedef Value (*CFunc3)(Context&,Value&,Value&,Value&);
+  typedef Value (*CFunc4)(Context&,Value&,Value&,Value&,Value&);
+  typedef Value (*CFunc5)(Context&,Value&,Value&,Value&,Value&,Value&);
+  typedef Value (*CFunc6)(Context&,Value&,Value&,Value&,Value&,Value&,Value&);
+  typedef Value (*CFunc7)(Context&,Value&,Value&,Value&,Value&,Value&,Value&,Value&);
+  typedef Value (*CFunc8)(Context&,Value&,Value&,Value&,Value&,Value&,Value&,Value&,Value&);
+  
+  typedef void* (*Func0)();
   typedef void* (*Func1)(void*);
-
+  typedef void* (*Func2)(void*,void*);
+  typedef void* (*Func3)(void*,void*,void*);
+  typedef void* (*Func4)(void*,void*,void*,void*);
+  typedef void* (*Func5)(void*,void*,void*,void*,void*);
+  typedef void* (*Func6)(void*,void*,void*,void*,void*,void*);
+  typedef void* (*Func7)(void*,void*,void*,void*,void*,void*,void*);
+  typedef void* (*Func8)(void*,void*,void*,void*,void*,void*,void*,void*);
+  
+  
   typedef const initializer_list<string>& string_list;
   
 
@@ -88,6 +103,7 @@ namespace Gomu{
     expArraySet,
     expFunction,
     expMemberFunction,
+    expMemberSymbol,
     expLeaf,
     expTuple,
     expSet
@@ -242,9 +258,13 @@ namespace Gomu{
     //! Evaluate a member function node (contextual or not)
     //! \param current the node of the function to evaluate
     //! \param nodes array of all nodes
-    //! \param size size of the array
-    void eval_member_function(Node& current,Node* nodes);
-        
+     void eval_member_function(Node& current,Node* nodes);
+
+    //! Evaluate a member symbol
+    //! \param current the node of the symbol to evaluate
+    //! \param nodes array of all nodes
+    void eval_member_symbol(Node& current,Node* nodes);
+    
     //! Evaluate a set node
     //! \param size size of the set
     //! \param current the node of the set
@@ -287,6 +307,10 @@ namespace Gomu{
     //! \param src specify the src to load 0:functions 1:member_functions 2:contextual_functions 
     void load_module_functions(Module* module,int src);
 
+    //! Load symbols of a module
+    //! \param the module to load
+    void load_module_symbols(Module* module);
+    
     //! Unload a function
     //! \param name the name of the function to delete
     //! \param args the string list of the function arguments
@@ -404,7 +428,7 @@ namespace Gomu{
     //! Index of the node brother
     slong bro;
     //! Specify if the node can be erased or not
-    bool erase;
+    //bool erase;
   };
   
   //-------------
@@ -477,8 +501,13 @@ namespace Gomu{
     //! Evaluate a command
     //! \param cmd command to evaluate
     //! \param context context of the evaluation
-    //! \param display specify if we display the last valus
-    void eval(string cmd,Context& context,bool display=true);
+    //! \param display specify if we display the last value
+    void eval(string cmd,Context& context);
+
+    //! Evaluate a command in very basic way
+    //! \param cmd the check command
+    //! \param context context of the evaluation
+    Value* eval_basic(string cmd,Context& context);
 
     //! Evaluate an expression
     //! \param pos indice of the expression to evaluate
@@ -508,6 +537,9 @@ namespace Gomu{
     //! \param cmd command
     //! \return string
     string get_string(size_t& pos,const string& cmd);
+
+    //! Purge the expression tree
+    void purge_tree();
     
     //! Set node to be the token of command at position pos
     //! \param node destination node of the token
@@ -579,6 +611,7 @@ namespace Gomu{
   //! Get the fullname of a function
   //! \param name short name of the function
   //! \param args string array of argument type
+  //! \param member speicy if the fucntion is a member function or not
   //! \return fullname of the function
   string function_fullname(string name,string_list args);
 

@@ -45,9 +45,11 @@ namespace Gomu{
   void
   array_del(void* v){
     ArrayValue* arr=(ArrayValue*)v;
-   Type* type=arr->type;
+    Value val;
+    val.type=arr->type;
     for(size_t i=0;i<arr->size;++i){
-      type->del(arr->tab[i]);
+      val.ptr=arr->tab[i];
+      val.pdel();
     }
     delete[] arr->tab;
     delete arr;
@@ -97,7 +99,7 @@ namespace Gomu{
     if((*(char*)v)==1)
       return "\033[35mtrue\033[0m";
     else
-      return "\033[35mtrue\033[0m";
+      return "\033[35mfalse\033[0m";
    }
 
   int
@@ -263,7 +265,7 @@ namespace Gomu{
   tuple_del(void* v){
     TupleValue* t=(TupleValue*)v;
     for(size_t i=0;i<t->size;++i){
-      t->tab[i].del();
+      t->tab[i].pdel();
     }
   }
   

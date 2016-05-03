@@ -108,6 +108,12 @@ namespace Gomu{
     else{
       while(contextual_functions[i].ptr!=nullptr) ++i;
       ncfunc=i;
+      i=0;
+    }
+    if(symbols==nullptr) nsymb=0;
+    else{
+      while(symbols[i].ptr!=nullptr) ++i;
+      nsymb=i;
     }
   }
   //********
@@ -138,7 +144,18 @@ namespace Gomu{
     comp=t.comp;
   }
 
-
+  //---------------------------------
+  // Type::Type(const Module::Type&)
+  //---------------------------------
+  
+  Type::Type(const Module::Type& t){
+    name=t.name;
+    disp=t.disp;
+    del=t.del;
+    copy=t.copy;
+    comp=t.comp;
+  }
+  
   //**************
   //* TupleValue *
   //**************
@@ -184,7 +201,7 @@ namespace Gomu{
   // get_slong(void*)
   //------------------
   
-  uint64
+  int64
   get_slong(void* v){
     fmpz* z=(fmpz*)v;
     if(fmpz_fits_si(z)) return fmpz_get_si(z);
@@ -214,4 +231,20 @@ namespace Gomu{
     return z;
   }
 
+  //----------------
+  // no_copy(void*)
+  //----------------
+  
+  void*
+  no_copy(void*){
+    ContextError("Copy is undefined for this type");
+  }
+
+  //----------------------
+  // no_comp(void*,void*)
+  //----------------------
+  int
+  no_comp(void*,void*){
+    ContextError("Comparison is undefined for this type");
+  }
 }

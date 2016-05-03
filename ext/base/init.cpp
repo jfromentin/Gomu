@@ -20,6 +20,9 @@
 #include "init.hpp"
 
 extern "C"{
+
+  bool True=true;
+  bool False=false;
   
   Gomu::Type types[]={
     TYPE_SENTINEL
@@ -41,12 +44,21 @@ extern "C"{
   
   //--- Contextual functions ---//
   Gomu::Module::Function contextual_functions[]={
+    {"Void","check",{"Module"},(void*)module_check},
     {"Void","delete",{"Symbol"},(void*)del},
     {"Void","execute",{"String"},(void*)execute},
     {"Generic","operator=",{"Symbol","Generic"},(void*)assignment},
-    {"Array","symbols",{"Type"},(void*)symbols},
+    {"Boolean","operator==",{"Generic","Generic"},(void*)equality},
+    {"Array","symbols",{"Type"},(void*)member_symbols},
     {"Type","type",{"Generic"},(void*)type},
     FUNC_SENTINEL
+  };
+
+
+  Gomu::Module::Symbol symbols[]={
+    {"true","Boolean",(void*)&True},
+    {"false","Boolean",(void*)&False},
+    SYMB_SENTINEL
   };
 }
 

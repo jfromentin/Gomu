@@ -17,26 +17,4 @@
  * along with Gomu. If not, see <http://www.gnu.org/licenses/>. 
  */
 
-#include "../../module.hpp"
-
-using namespace Gomu;
-
-//! Assigneme function
-//! \param lhs left hand side of assignment
-//! \param rhs right hand side of assignment
-Value assignment(Context&,Value& lhs,Value& rhs);
-
-//! Unload a symbol
-Value del(Context&,Value&);
-
-//! Return the type of a value
-Value type(Context&,Value&);
-
-//! Return an array of member functions of a type
-Value member_symbols(Context&,Value&);
-
-//! Execute commands strored in a file
-Value execute(Context&, Value&);
-
-//! Test equality between values
-Value equality(Context&, Value&, Value&);
+#include "integer.hpp"

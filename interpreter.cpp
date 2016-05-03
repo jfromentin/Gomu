@@ -132,7 +132,7 @@ namespace Gomu{
   Context::add_symbol(string name,Type* type,void* ptr,bool lock){
     Symbol& s=symbols[name];
     if(s.locked) ContextError("A locked symbol named "+name+" already exist");
-    s.del();s.type=type;
+    s.pdel();s.type=type;
     s.ptr=ptr;s.locked=lock;
     s.name=name;
     s.hide=false;
@@ -151,9 +151,9 @@ namespace Gomu{
     return symbol->type==type_meta_function or symbol->type==type_function;
   }
 
-  //-----------------------------------------------
+  //------------------------------------------------------
   // Context::can_add_member_function(string,string_list)
-  //-----------------------------------------------
+  //------------------------------------------------------
   
   bool
   Context::can_add_member_function(string name,string_list targs){
@@ -161,7 +161,7 @@ namespace Gomu{
     string cname=*(targs.begin());
     Type* ctype=get_type(cname);
     if(ctype==nullptr) ContextError("The class type "+cname+" does not exist");
-    return can_add(cname+"."+name);
+    return can_add_function(cname+"."+name,targs);
   }
 
  
@@ -220,7 +220,7 @@ namespace Gomu{
     if(nargs!=func->signature.size())
       ContextError("The number of arguments is incorect ("+to_string(nargs)+" instead of "+to_string(func->signature.size())+").");
     for(size_t i=0;i<nargs;++i){
-      if(args[i]->type==type_symbol and signature[i]!=type_symbol){
+      if(args[i]->type==type_symbol and signature[i]!=type_symbol and signature[i]!=type_generic){
 	args[i]=(Value*)args[i]->ptr;
       }
       if(signature[i]!=type_generic and signature[i]!=args[i]->type)
@@ -279,6 +279,11 @@ namespace Gomu{
       return eval_function((Function*)symbol->ptr,args,nargs);
     }
     else if(symbol->type==type_meta_function){
+      for(size_t i=0;i<nargs;++i){
+	if(args[i]->type==type_symbol){
+	  args[i]=(Value*)(args[i]->ptr);
+	}
+      }
       string fullname=function_fullname(symbol->name,args,nargs);
       Value *val=get_symbol(fullname);
       if(val==nullptr) ContextError("There is no function "+fullname);
@@ -296,28 +301,50 @@ namespace Gomu{
   
   void
   Context::eval_member_function(Node& current,Node* nodes){
+    string name=current.str;
     Value* args[max_arguments_number];
     size_t nargs=set_arguments(current,nodes,args);
     Value* first=args[0]->eval();
     Type* type=first->type;
-    Value* val=get_symbol(type,current.str);
-    if(val==nullptr){
+    Symbol* symbol=get_symbol(type,name);
+    if(symbol==nullptr){
       if(type==type_type){
 	type=(Type*)first->ptr;
-	val=get_symbol(type,current.str);
+	symbol=get_symbol(type,name);
 	//current.son=nodes[current.son].bro;
-	if(val==nullptr)
-	  ContextError("No member function "+current.str+" for tyipe "+type->name);
-	current.value=eval_function((Function*)val->ptr,&args[1],nargs-1);
+	if(symbol==nullptr)
+	  ContextError("No member function "+name+" for tyipe "+type->name);
+	current.value=eval_function(symbol,&args[1],nargs-1);
 	return;
       }
       else{
-	ContextError("No member function "+current.str+" for type "+type->name);
+	ContextError("No member function "+name+" for type "+type->name);
       }
     }
-    if(val->type!=type_function)
-      ContextError("The symbol named "+current.str+" is not callable");
-    current.value=eval_function((Function*)val->ptr,args,nargs);
+    current.value=eval_function(symbol,args,nargs);
+  }
+
+  //--------------------------------------------------------
+  // Context::eval_member_symbol(Node& current,Node* nodes)
+  //--------------------------------------------------------
+
+  void
+  Context::eval_member_symbol(Node& current,Node* nodes){
+    string name=current.str;
+    Node& cnode=nodes[current.son];
+    Symbol* symbol=get_symbol(cnode.str);
+    if(symbol==nullptr) ContextError("Class type unkown");
+    Type* type=symbol->type;
+    if(type==type_type){
+      name=cnode.str+"."+name;
+    }
+    else{
+      name=type->name+"."+name;
+    }
+    symbol=get_symbol(name);
+    if(symbol==nullptr) ContextError("Symbol "+name+" does not exist");
+    current.value.type=type_symbol;
+    current.value.ptr=symbol;
   }
 
   //---------------------------------------
@@ -448,10 +475,11 @@ namespace Gomu{
     module->handle=handle;
     module->name=name;
     //Loading types
-    Type* types=(Type*)dlsym(handle,"types");
+    Module::Type* types=(Module::Type*)dlsym(handle,"types");
     module->functions=(Module::Function*)dlsym(handle,"functions");
     module->member_functions=(Module::Function*)dlsym(handle,"member_functions");
     module->contextual_functions=(Module::Function*)dlsym(handle,"contextual_functions");
+    module->symbols=(Module::Symbol*)dlsym(handle,"symbols");
     module->init(types);
     //Test if we can load all types
     for(size_t i=0;i<module->ntype;++i){
@@ -464,12 +492,18 @@ namespace Gomu{
     module->types=new string[module->ntype];
     for(size_t i=0;i<module->ntype;++i){
       Type* type=new Type(types[i]);
+      *(types[i].ptr)=type;
       module->types[i]=type->name;
       add_symbol(type->name,type_type,type);
     }
+    //Call init
+    void (*init)()=(void(*)())dlsym(handle,"init");
+    if(init!=nullptr) (*init)();
+    //Load functions and symbols
     load_module_functions(module,0);
     load_module_functions(module,1);
     load_module_functions(module,2);
+    load_module_symbols(module);
   }
 
   //---------------------------------------------
@@ -525,6 +559,26 @@ namespace Gomu{
     }
   }
 
+  //---------------------------------------
+  // Context::load_module_symbols(Module*)
+  //---------------------------------------
+  void
+  Context::load_module_symbols(Module* module){
+    for(size_t i=0;i<module->nsymb;++i){
+      Module::Symbol& symbol=module->symbols[i];
+      Type* type=get_type(symbol.type);
+      if(type==nullptr)
+	cout<<"Type "<<symbol.type<<" does not exist"<<endl;
+      if(can_add(symbol.name) and type!=nullptr){
+	add_symbol(symbol.name,type,symbol.ptr);
+	symbol.loaded=true;
+      }
+      else{
+	symbol.loaded=false;
+      }
+    }
+  }
+  
   //----------------------------------------------
   // Context::unload_function(string,string_list)
   //----------------------------------------------
@@ -556,6 +610,12 @@ namespace Gomu{
     for(size_t i=0;i<module->ntype;++i){
       unload_type(get_type(module->types[i]));
     }
+    //Unload module symbols
+    for(size_t i=0;i<module->nsymb;++i){
+      Module::Symbol& symbol=module->symbols[i];
+      if(symbol.loaded) unload_symbol(symbol.name);
+    }
+    //Unload module itself
     dlclose(module->handle);
     unload_symbol(module->name);
   }
@@ -602,12 +662,16 @@ namespace Gomu{
   Context::reload_module(Module* module){
     //** Unload some module member
     unload_module_functions(module); //unload functions
+    //Unload module symbols
+    for(size_t i=0;i<module->nsymb;++i){
+      Module::Symbol& symbol=module->symbols[i];
+      if(symbol.loaded) unload_symbol(symbol.name);
+    }
     if(module->handle!=nullptr){
       dlclose(module->handle); //close previous module handle
       module->handle=nullptr;
     }
     //we postpone the unload of module->types
-    
     //** Load the new version of the library
     string filename="ext/"+module->name+".so";
     void* handle=dlopen(filename.c_str(),RTLD_NOW);
@@ -616,11 +680,11 @@ namespace Gomu{
       RuntimeError("In loading module "+module->name+" : "+dlerror());
     }
     Module nmod; //A temporary module for the newly loaded data
-    
-    Type* types=(Type*)dlsym(handle,"types"); 
+    Module::Type* types=(Module::Type*)dlsym(handle,"types"); 
     nmod.functions=(Module::Function*)dlsym(handle,"functions");
     nmod.member_functions=(Module::Function*)dlsym(handle,"member_functions");
     nmod.contextual_functions=(Module::Function*)dlsym(handle,"contextual_functions");
+    nmod.symbols=(Module::Symbol*)dlsym(handle,"symbols");
     nmod.init(types);//init the module, ie, compute size of arrays
     
     //Test if we can load the new types
@@ -665,14 +729,16 @@ namespace Gomu{
     delete[] module->types; //unload types array
     module->types=new string[nmod.ntype];
     for(size_t i=0;i<nmod.ntype;++i){
-      Type& nmod_type=types[i];
+      Module::Type& nmod_type=types[i];
       module->types[i]=nmod_type.name;
       if(link[i]==-1){
 	Type *type=new Type(nmod_type);
+	*nmod_type.ptr=type;
 	add_symbol(type->name,type_type,type);
       }
       else{
 	Type* type=get_type(nmod_type.name);
+	*nmod_type.ptr=type;
 	type->disp=nmod_type.disp;
 	type->del=nmod_type.del;
 	type->copy=nmod_type.copy;
@@ -686,10 +752,16 @@ namespace Gomu{
     module->nmfunc=nmod.nmfunc;
     module->contextual_functions=nmod.contextual_functions;
     module->ncfunc=nmod.ncfunc;
+    module->symbols=nmod.symbols;
+    module->nsymb=nmod.nsymb;
     module->handle=handle;
+    //Call init
+    void (*init)()=(void(*)())dlsym(handle,"init");
+    if(init!=nullptr) (*init)();
     load_module_functions(module,0);
     load_module_functions(module,1);
     load_module_functions(module,2);
+    load_module_symbols(module);
   }
 
   //---------------------------------------------
@@ -723,6 +795,18 @@ namespace Gomu{
       return (*((CFunc1)ptr))(context,*args[0]);
     case 2:
       return (*((CFunc2)ptr))(context,*args[0],*args[1]);
+    case 3:
+      return (*((CFunc3)ptr))(context,*args[0],*args[1],*args[2]);
+    case 4:
+      return (*((CFunc4)ptr))(context,*args[0],*args[1],*args[2],*args[3]);
+    case 5:
+      return (*((CFunc5)ptr))(context,*args[0],*args[1],*args[2],*args[3],*args[4]);
+    case 6:
+      return (*((CFunc6)ptr))(context,*args[0],*args[1],*args[2],*args[3],*args[4],*args[5]);
+    case 7:
+      return (*((CFunc7)ptr))(context,*args[0],*args[1],*args[2],*args[3],*args[4],*args[5],*args[6]);
+    case 8:
+      return (*((CFunc8)ptr))(context,*args[0],*args[1],*args[2],*args[3],*args[4],*args[5],*args[6],*args[7]);
     default:
       Bug("Not yet implemented");
       break;
@@ -741,8 +825,32 @@ namespace Gomu{
     Value res;
     res.type=tr;
     switch(nargs){
+    case 0:
+      res.ptr=(*((Func0)ptr))();
+      break;
     case 1:
       res.ptr=(*((Func1)ptr))(args[0]->eval()->ptr);
+      break;
+    case 2:
+      res.ptr=(*((Func2)ptr))(args[0]->eval()->ptr,args[1]->eval()->ptr);
+      break;
+    case 3:
+      res.ptr=(*((Func3)ptr))(args[0]->eval()->ptr,args[1]->eval()->ptr,args[2]->eval()->ptr);
+      break;
+    case 4:
+      res.ptr=(*((Func4)ptr))(args[0]->eval()->ptr,args[1]->eval()->ptr,args[2]->eval()->ptr,args[3]->eval()->ptr);
+      break;
+    case 5:
+      res.ptr=(*((Func5)ptr))(args[0]->eval()->ptr,args[1]->eval()->ptr,args[2]->eval()->ptr,args[3]->eval()->ptr,args[4]->eval()->ptr);
+      break;
+    case 6:
+      res.ptr=(*((Func6)ptr))(args[0]->eval()->ptr,args[1]->eval()->ptr,args[2]->eval()->ptr,args[3]->eval()->ptr,args[4]->eval()->ptr,args[5]->eval()->ptr);
+      break;
+    case 7:
+      res.ptr=(*((Func7)ptr))(args[0]->eval()->ptr,args[1]->eval()->ptr,args[2]->eval()->ptr,args[3]->eval()->ptr,args[4]->eval()->ptr,args[5]->eval()->ptr,args[6]->eval()->ptr);
+      break;
+    case 8:
+      res.ptr=(*((Func8)ptr))(args[0]->eval()->ptr,args[1]->eval()->ptr,args[2]->eval()->ptr,args[3]->eval()->ptr,args[4]->eval()->ptr,args[5]->eval()->ptr,args[6]->eval()->ptr,args[7]->eval()->ptr);
       break;
     default:
       Bug("Not yet implemented");
@@ -926,7 +1034,7 @@ namespace Gomu{
 	++first;
 	if(first>last or nodes[first].tokenType!=tName){
 	  if(nodes[first-1].tokenType==tDot) SyntaxError("Name missing after dot",nodes[first-1].pos,nodes[first-1].pos);
-	  SyntaxError("Name missing after ::",nodes[first-1].pos,nodes[first-1].pos+1);
+	  SyntaxError("Name missing after .",nodes[first-1].pos,nodes[first-1].pos+1);
 	}
 	string name=nodes[first].str;
 	++first;
@@ -943,7 +1051,7 @@ namespace Gomu{
 	else{
 	  Node& nnode=nodes[first-1];
 	  nnode.son=root;
-	  nnode.expressionType=expMemberFunction;
+	  nnode.expressionType=expMemberSymbol;
 	  nnode.str=name;
 	  node.expressionType=expLeaf;
 	  root=first-1;
@@ -1113,39 +1221,48 @@ namespace Gomu{
     }
   }
 
-  //---------------------------
-  // Interpreter::eval(string)
-  //---------------------------
+  //----------------------------------------
+  // Interpreter::eval(string,Context,bool)
+  //----------------------------------------
   
-  void Interpreter::eval(string cmd,Context& context,bool display){
-    size_t root;
-    Node* node;
+  void Interpreter::eval(string cmd,Context& context){
     bool error=false;
+    Value* res;
     try{
-      split_to_tokens(cmd);
-      size_t first=0;
-      root=construct_tree(first,nodes_number-1,max_precedence_level);
-      eval_expression(root,context);
-      node=&nodes[root];
-      Value* value=node->value.eval();
-      if(value->type!=nullptr and value->type!=type_void and display){
+      res=eval_basic(cmd,context);
+      Value* value=res->eval();
+      if(value->type!=nullptr and value->type!=type_void){
 	cout<<value->disp()<<endl;
-      }
+      }     
     }
     catch(Error err){
       err.disp(cout,cmd);
       cout<<endl;
       error=true;
+      purge_tree();
     }
     //Delete the return value
     if(not error){
-      if(node->erase){
-      node->value.del();
-      node->erase=false;
-      }
+      res->pdel();
     }
   }
 
+  //------------------------------------------------------
+  // Interpreter::eval_basic(string cmd,Context& context)
+  //------------------------------------------------------
+
+  Value* Interpreter::eval_basic(string cmd,Context& context){
+    size_t root;
+    Node* node;
+    bool error=false;
+    split_to_tokens(cmd);
+    size_t first=0;
+    root=construct_tree(first,nodes_number-1,max_precedence_level);
+    eval_expression(root,context);
+    node=&nodes[root];
+    return &node->value;
+  }
+  
   //-----------------------------------------------
   // Interpreter::eval_expression(size_t,Context&)
   //-----------------------------------------------
@@ -1180,6 +1297,9 @@ namespace Gomu{
     case expMemberFunction:
       context.eval_member_function(node,nodes);
       break;
+    case expMemberSymbol:
+      context.eval_member_symbol(node,nodes);
+      break;
     case expArray:
       context.eval_array(size,node,nodes);
       break;
@@ -1197,10 +1317,7 @@ namespace Gomu{
     }
     j=node.son;
     while(j!=-1){
-      if(nodes[j].erase){
-	nodes[j].value.del();
-	nodes[j].erase=false;
-      }
+      nodes[j].value.pdel();
       j=nodes[j].bro;
     }
   }
@@ -1260,6 +1377,17 @@ namespace Gomu{
     return str;
   }
 
+  //---------------------------
+  // Interpreter::purge_tree()
+  //---------------------------
+
+  void
+  Interpreter::purge_tree(){
+    for(size_t i=0;i<nodes_number;++i){
+      nodes[i].value.pdel();
+    }
+  }
+
   //-----------------------------------------------------
   // Interpreter::set_token(Node&,size_t&,const string&)
   //-----------------------------------------------------
@@ -1267,7 +1395,6 @@ namespace Gomu{
   void
   Interpreter::set_token(Node& node,size_t& pos,const string& cmd){
     node.value.type=nullptr;
-    node.erase=false;
     size_t oldPos;
     node.pos=pos;
     node.son=-1;
@@ -1283,7 +1410,6 @@ namespace Gomu{
       oldPos=pos;
       node.value.type=type_integer;
       node.value.ptr=(void*)(get_integer(pos,cmd));
-      node.erase=true;
       node.str=cmd.substr(oldPos,pos-oldPos+1);
       return;
     }
@@ -1294,7 +1420,6 @@ namespace Gomu{
       string* pstr=new string;
       *pstr=node.str;
       node.value.ptr=(void*)pstr;
-      node.erase=true;
       return;
     }
     if(('a'<=l and l<='z') or ('A'<=l and l<='Z') or l=='_'){
