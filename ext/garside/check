@@ -5,10 +5,15 @@
 # Garside element
 
 ArtinA.garside_element(0)==a0
-ArtinA.garside_element(1)==a1
-ArtinA.garside_element(2)==a1*a2*a1
-ArtinA.garside_element(3)==a1*a2*a3*a1*a2*a1
-ArtinA.garside_element(4)==a1*a2*a3*a4*a1*a2*a3*a1*a2*a1
+Delta1=ArtinA.garside_element(1)
+Delta2=ArtinA.garside_element(2)
+Delta3=ArtinA.garside_element(3)
+Delta4=ArtinA.garside_element(4)
+Delta1==a1
+Delta2==a1*a2*Delta1
+Delta3==a1*a2*a3*Delta2
+Delta4==a1*a2*a3*a4*Delta3
+
 
 #******************
 #* Dual of type A *
@@ -168,7 +173,19 @@ DualA.phi(2,a12*A13)==a23*A12
 # Garside element
 
 DualA.garside_element(0)==a00
-DualA.garside_element(1)==a12
-DualA.garside_element(2)==a12*a23
-DualA.garside_element(3)==a12*a23*a34
-DualA.garside_element(4)==a12*a23*a34*a45
+delta1=DualA.garside_element(1)
+delta2=DualA.garside_element(2)
+delta3=DualA.garside_element(3)
+delta4=DualA.garside_element(4)
+delta1==a12
+delta2==delta1*a23
+delta3==delta2*a34
+delta4==delta3*a45
+
+# phi-tail
+DualA.phi_tail(1,delta2)==delta1
+DualA.phi_tail(2,delta3)==delta2
+DualA.phi_tail(3,delta4)==delta3
+DualA.phi_tail(1,delta2*delta2)==delta1*delta1
+DualA.phi_tail(2,delta3*delta3)===delta2*delta2
+DualA.phi_tail(3,delta4*delta4)===delta3*delta3

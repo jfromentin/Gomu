@@ -103,7 +103,7 @@ public:
 
   //! Test if the StackedList is empty
   bool is_empty() const;
-
+  
   //! Return last data of the list
   NData last();
 };

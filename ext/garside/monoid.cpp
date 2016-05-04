@@ -343,6 +343,16 @@ MonoidTrait::~MonoidTrait(){
   if(right_reversing!=nullptr) delete right_reversing;
 }
 
+//---------------------------------------
+// MonoidTrait::are_equivalen(Word,Word)
+//---------------------------------------
+
+bool
+MonoidTrait::are_equivalent(const Word& u,const Word& v){
+  left_reversing->set_word(u,v);
+  left_reversing->check_positivity();
+  return left_reversing->word.is_empty();
+}
 
 //-----------------------------------------
 // MonoidTrait::apply_phi(size_t,Word,int)
@@ -428,6 +438,24 @@ MonoidTrait::phi(size_t r,const Word& w,int p){
   Word res(s);
   for(size_t i=0;i<s;++i){
     res[i]=ranked_phi_germ(r,w[i],p);
+  }
+  return res;
+}
+
+//------------------------------------
+// MonoidTrait::phi_tail(size_t,Word)
+//------------------------------------
+
+Word
+MonoidTrait::phi_tail(size_t r,const Word& w){
+  Word u=w;
+  Word res;
+  Word delta=garside_element(r);
+  while(true){
+    pair<Word,Word> temp=right_gcd_x(u,delta);
+    if(temp.first.is_empty()) return res;
+    res=res*temp.first;
+    u=temp.second;
   }
   return res;
 }

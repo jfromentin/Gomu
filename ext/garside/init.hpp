@@ -88,6 +88,9 @@ void* mt_phi(void* m,void* r,void* w);
 //! Return the word under power of ranked Garside automorphism
 void* mt_phi_power(void* m,void* r,void* w,void* p);
 
+//! Return ranked phi-tail of an element
+void* mt_phi_tail(void* m,void* r,void* w);
+
 //! Left reverse a word
 void* mt_left_reverse(void* m,void* w);
 
@@ -157,12 +160,18 @@ void* word_concatenate(void*,void*);
 //! Display a ArtinWordA
 string ArtinWordA_display(void* w);
 
+//! Test equivalence between ArtinWordA
+void* ArtinWordA_equivalent(void* u,void* v);
+
 //*************
 //* DualWordA *
 //*************
 
 //! Display a DualWordA
 string DualWordA_display(void* w);
+
+//! Test equivalence between DualWordA
+void* DualWordA_equivalent(void* u,void* v);
 
 //**********************
 //* Inline definitions *
@@ -235,6 +244,11 @@ ArtinWordA_display(void* w){
   return ((Word*)w)->display(ArtinA_disp);
 }
 
+inline void*
+ArtinWordA_equivalent(void* u,void* v){
+  return Gomu::to_boolean(ArtinA_mf.are_equivalent(*(Word*)u,*(Word*)v));
+}
+
 //------------
 // DualWordA
 //------------
@@ -244,3 +258,7 @@ DualWordA_display(void* w){
   return ((Word*)w)->display(DualA_disp);
 }
 
+inline void*
+DualWordA_equivalent(void* u,void* v){
+  return Gomu::to_boolean(DualA_mf.are_equivalent(*(Word*)u,*(Word*)v));
+}

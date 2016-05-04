@@ -183,6 +183,9 @@ public:
   //! Apply phi_r^p to the word
   void apply_phi(size_t r,Word& w,int p=1);
 
+  //! Test if two words are equivalent
+  bool are_equivalent(const Word& u,const Word& v);
+  
   //! Return garside_element of rank r
   Word garside_element(size_t r);
   
@@ -244,6 +247,9 @@ public:
 
   //! Return the word obtained under phi_r^p
   Word phi(size_t r,const Word& w,int p=1);
+
+  //! Return ranked phi-tail of an element
+  Word phi_tail(size_t r,const Word& w);
 
   //! Return right complement of x and y
   Word right_complement(const Generator& x,const Generator& y);
@@ -338,6 +344,12 @@ public:
   //! Construct a word from an array
   Word(const Array<Generator>&);
   Word(Array<Generator>&&);
+
+  //! Assignement operator with copy
+  Word& operator=(const Word& w);
+
+  //! Assignement operator with move
+  Word& operator=(Word&& w);
   
   //! Concatenate a word to this one
   Word concatenate(const Word& w) const;
@@ -607,6 +619,16 @@ Word::Word(Array<Generator>&& a):Array(a){}
 inline Word
 Word::concatenate(const Word& w) const{
   return Word(append(w));
+}
+
+inline Word&
+Word::operator=(const Word& w){
+  Array::operator=(w);
+}
+
+inline Word&
+Word::operator=(Word&& w){
+  Array::operator=(w);
 }
 
 //***********************

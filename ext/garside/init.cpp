@@ -82,6 +82,8 @@ extern "C"{
   Gomu::Module::Function functions[]={
     {"ArtinWordA","operator*",{"ArtinWordA","ArtinWordA"},(void*)word_concatenate},
     {"DualWordA","operator*",{"DualWordA","DualWordA"},(void*)word_concatenate},
+    {"Boolean","operator===",{"ArtinWordA","ArtinWordA"},(void*)ArtinWordA_equivalent},
+    {"Boolean","operator===",{"DualWordA","DualWordA"},(void*)DualWordA_equivalent},
     {"Word","word",{"Array"},(void*)word_from_array},
     FUNC_SENTINEL
   };
@@ -104,6 +106,7 @@ extern "C"{
     {"ArtinWordA","left_reverse",{"ArtinMonoidFamilyA","ArtinWordA","ArtinWordA"},(void*)mt_left_reverse2},
     {"ArtinWordA","phi",{"ArtinMonoidFamilyA","Integer","ArtinWordA"},(void*)mt_phi},
     {"ArtinWordA","phi",{"ArtinMonoidFamilyA","Integer","ArtinWordA","Integer"},(void*)mt_phi_power},
+    {"ArtinWordA","phi_tail",{"ArtinMonoidFamilyA","Integer","ArtinWordA"},(void*)mt_phi_tail},
     {"ArtinWordA","right_complement",{"ArtinMonoidFamilyA","ArtinWordA","ArtinWordA"},(void*)mt_right_complement},
     {"ArtinWordA","right_denominator",{"ArtinMonoidFamilyA"},(void*)mt_right_denominator},
     {"ArtinWordA","right_lcm",{"ArtinMonoidFamilyA","ArtinWordA","ArtinWordA"},(void*)mt_right_lcm},
@@ -135,6 +138,7 @@ extern "C"{
     {"DualWordA","left_reverse",{"DualMonoidFamilyA","DualWordA","DualWordA"},(void*)mt_left_reverse2},
     {"DualWordA","phi",{"DualMonoidFamilyA","Integer","DualWordA"},(void*)mt_phi},
     {"DualWordA","phi",{"DualMonoidFamilyA","Integer","DualWordA","Integer"},(void*)mt_phi_power},
+    {"DualWordA","phi_tail",{"DualMonoidFamilyA","Integer","DualWordA"},(void*)mt_phi_tail},
     {"DualWordA","right_complement",{"DualMonoidFamilyA","DualWordA","DualWordA"},(void*)mt_right_complement},
     {"DualWordA","right_denominator",{"DualMonoidFamilyA"},(void*)mt_right_denominator},
     {"DualWordA","right_lcm",{"DualMonoidFamilyA","DualWordA","DualWordA"},(void*)mt_right_lcm},
@@ -205,7 +209,7 @@ extern "C"{
 
 void* mt_garside_element(void* m,void* r){
   MonoidTrait* monoid=(MonoidTrait*)m;
- if(not monoid->has_garside_element())
+  if(not monoid->has_garside_element())
     RuntimeError("Monoid doesn't have Garside element");
  return (void*)(new Word(monoid->garside_element(Gomu::get_slong(r))));
 }
@@ -375,6 +379,18 @@ void* mt_phi_power(void* m,void* r,void* w,void* p){
   size_t rank=Gomu::get_slong(r);
   int power=Gomu::get_slong(p);
   return new Word(monoid->phi(rank,*(Word*)w,power));
+}
+
+//----------------------------------------
+// Word phi_tail(MonoidTrai,Integer,Word)
+//----------------------------------------
+
+void* mt_phi_tail(void* m,void* r,void* w){
+  MonoidTrait* monoid=(MonoidTrait*)m;
+  if(not monoid->has_garside_automorphism())
+    RuntimeError("Monoid has not Garside automorphism");
+  size_t rank=Gomu::get_slong(r);
+  return new Word(monoid->phi_tail(rank,*(Word*)w));
 }
 
 //----------------------------------------------

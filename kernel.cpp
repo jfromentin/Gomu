@@ -344,6 +344,7 @@ namespace Gomu{
     interpreter.add_operator("<=","operator<=",opBinary,8);
     interpreter.add_operator(">=","operator>=",opBinary,8);
     interpreter.add_operator("==","operator==",opBinary,8);
+    interpreter.add_operator("===","operator===",opBinary,8);
     interpreter.add_operator("!=","operator!=",opBinary,8);
     interpreter.add_operator("+","operator+",opBinary,4);
     interpreter.add_operator("-","operator-",opBinary,4);
