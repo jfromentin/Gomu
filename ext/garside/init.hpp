@@ -91,6 +91,12 @@ void* mt_phi_power(void* m,void* r,void* w,void* p);
 //! Return ranked phi-tail of an element
 void* mt_phi_tail(void* m,void* r,void* w);
 
+//! Return ranked phi-tail of an element together with remainder
+void* mt_phi_tail_x(void* m,void* r,void* w);
+
+//! Return the ranked phi-splitting of an element
+void* mt_phi_splitting(void* m,void* r,void* w);
+
 //! Left reverse a word
 void* mt_left_reverse(void* m,void* w);
 

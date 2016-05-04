@@ -189,3 +189,14 @@ DualA.phi_tail(3,delta4)==delta3
 DualA.phi_tail(1,delta2*delta2)==delta1*delta1
 DualA.phi_tail(2,delta3*delta3)===delta2*delta2
 DualA.phi_tail(3,delta4*delta4)===delta3*delta3
+
+# phi-splitting
+DualA.phi_splitting(1,delta2)==[a12,a00,delta1]
+DualA.phi_splitting(1,delta2*delta2)==[a12,a12,a00,delta1*delta1]
+DualA.phi_splitting(2,a12)==[a12]
+DualA.phi_splitting(2,a23)==[a23]
+DualA.phi_splitting(2,a13)==[a13]
+DualA.phi_splitting(2,a34)==[a23,a00]
+DualA.phi_splitting(2,a24)==[a13,a00]
+DualA.phi_splitting(2,a14)==[a23,a00,a00]
+DualA.phi_splitting(2,delta3)==[a23,a00,delta2]

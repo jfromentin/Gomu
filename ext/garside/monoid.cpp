@@ -460,6 +460,42 @@ MonoidTrait::phi_tail(size_t r,const Word& w){
   return res;
 }
 
+//--------------------------------------
+// MonoidTrait::phi_tail_x(size_t,Word)
+//--------------------------------------
+
+pair<Word,Word>
+MonoidTrait::phi_tail_x(size_t r,const Word& w){
+  Word u=w;
+  Word res;
+  Word delta=garside_element(r);
+  while(true){
+    pair<Word,Word> temp=right_gcd_x(u,delta);
+    if(temp.first.is_empty()) return pair<Word,Word>(u,res);
+    res=res*temp.first;
+    u=temp.second;
+  }
+  return pair<Word,Word>(u,res);
+}
+
+//-----------------------------------------
+// MonoidTrait::phi_splitting(size_t,Word)
+//-----------------------------------------
+
+Array<Word>
+MonoidTrait::phi_splitting(size_t r,const Word& w){
+  deque<Word> res;
+  Word u=w;
+  while(not u.is_empty()){
+    pair<Word,Word> p=phi_tail_x(r,u);
+    u=phi(r+1,p.first,-1);
+    res.push_front(p.second);
+  }
+  Array<Word> res_array(res.size());
+  for(size_t i=0;i<res.size();++i) res_array[i]=res[i];
+  return res_array;
+}
+
 //----------------------------------------------------
 // MonoidTrait::right_complement(Generator,Generator)
 //----------------------------------------------------

@@ -251,6 +251,12 @@ public:
   //! Return ranked phi-tail of an element
   Word phi_tail(size_t r,const Word& w);
 
+  //! Return ranked phi-tail of an element together with remainder
+  pair<Word,Word> phi_tail_x(size_t r,const Word& w);
+
+  //! Return the ranked phi-splitting of an element
+  Array<Word> phi_splitting(size_t r,const Word& w);
+  
   //! Return right complement of x and y
   Word right_complement(const Generator& x,const Generator& y);
   
