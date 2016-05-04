@@ -505,11 +505,6 @@ namespace Gomu{
     if(type!=type_symbol) return this;
     return (Value*)ptr;
   }
-
-  //---------------------
-  // Auxiliary Functions
-  //---------------------
-
 }
 
 

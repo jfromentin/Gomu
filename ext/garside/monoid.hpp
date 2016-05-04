@@ -49,7 +49,7 @@ typedef string(*DisplayGenerator)(const Generator& x);
 //! Return the number of generators of the monoid of rank n among a monoid familly
 typedef size_t(*GeneratorsNumber)(size_t n);
 //! Return the rank of a Generator
-typedef size_t(*RankGenerator)(const Generator& x);
+typedef size_t(*GeneratorRank)(const Generator& x);
 //! Ranked Generator bijection
 typedef Generator(*RankedGeneratorBijection)(size_t r,const Generator& x,int p);
 //! Return a ranked word
@@ -278,6 +278,8 @@ public:
   DisplayGenerator gdisp;
   //! Function returning the number of generators for a given rank 
   GeneratorsNumber gnum;
+  //! Return rank of a generator
+  GeneratorRank grank;
   //! Label of the monoid family
   string label;
   //! Ranked Garside automorphism germ
@@ -286,7 +288,7 @@ public:
   RankedWordFactory ranked_garside_word_factory;
   
   //! Unique constructor
-  MonoidFamily(string l,DisplayGenerator d,GeneratorsNumber n);
+  MonoidFamily(string l,DisplayGenerator d,GeneratorsNumber n,GeneratorRank r);
 
   //! Destructor
   ~MonoidFamily();
@@ -311,6 +313,12 @@ public:
   
   //! Return the word obtained under phi_r^p
   Word phi(size_t r,const Word& w,int p=1);
+
+  //! Return phi-normal form of an element
+  Word phi_normal(const Word& w);
+
+  //! Return phi-normal form of an element of rank r
+  Word phi_normal(size_t r,const Word& w);
   
   //! Return ranked phi-tail of an element
   Word phi_tail(size_t r,const Word& w);
@@ -328,9 +336,7 @@ public:
   void set_ranked_phi_germ(RankedGeneratorBijection rpg);
   
   //! Set ranked garside word factory
-  void set_ranked_garside_word_factory(RankedWordFactory rgwf);
-  
-  
+  void set_ranked_garside_word_factory(RankedWordFactory rgwf);  
 };
 
 //------
@@ -489,6 +495,12 @@ MonoidFamily::has_garside_automorphism() const{
   return ranked_phi_germ!=nullptr;
 }
 
+inline Word
+MonoidFamily::phi_normal(const Word& w){
+  return phi_normal(rank(w),w);
+}
+
+				    
 inline void
 MonoidFamily::set_ranked_phi_germ(RankedGeneratorBijection rpg){
   ranked_phi_germ=rpg;

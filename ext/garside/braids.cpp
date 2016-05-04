@@ -24,8 +24,8 @@
 //* Global objects *
 //******************
 
-MonoidFamily ArtinA_mf("Artin A-type",ArtinA_disp,ArtinA_gnum);
-MonoidFamily DualA_mf("Dual A-type",DualA_disp,DualA_gnum);
+MonoidFamily ArtinA_mf("Artin A-type",ArtinA_disp,ArtinA_gnum,ArtinA_rank);
+MonoidFamily DualA_mf("Dual A-type",DualA_disp,DualA_gnum,DualA_rank);
 
 //***********************
 //* Auxiliary functions *

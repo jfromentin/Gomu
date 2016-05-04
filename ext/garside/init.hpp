@@ -48,6 +48,9 @@ void* mf_generators_number(void* m,void* n);
 //! Return the word under ranked Garside automorphism
 void* mf_phi(void* m,void* r,void* w);
 
+//! Return phi-normal form of an element
+void* mf_phi_normal(void* m,void* w);
+
 //! Return the word under power of ranked Garside automorphism
 void* mf_phi_power(void* m,void* r,void* w,void* p);
 
@@ -59,6 +62,9 @@ void* mf_phi_tail_x(void* m,void* r,void* w);
 
 //! Return the ranked phi-splitting of an element
 void* mf_phi_splitting(void* m,void* r,void* w);
+
+//! Return the rank of a Word
+void* mf_rank(void* m,void* w);
 
 //***************
 //* MonoidTrait *
@@ -200,6 +206,16 @@ mf_delete(void* m){
 inline void*
 mf_generators_number(void* m,void* n){
   return Gomu::to_integer(((MonoidFamily*)m)->generators_number(Gomu::get_slong(n)));
+}
+
+inline void*
+mf_phi_normal(void* m,void* w){
+  return (void*)(new Word(((MonoidFamily*)m)->phi_normal(*(Word*)w)));
+}
+
+inline void*
+mf_rank(void* m,void* w){
+  return Gomu::to_integer(((MonoidFamily*)m)->rank(*(Word*)w));
 }
 
 //------

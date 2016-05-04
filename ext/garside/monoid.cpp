@@ -321,7 +321,7 @@ RightReversing::set_word(const Word& den,const Word& num){
 // MonoidFamily::MonoidFamily(string,DisplayGenerator,GeneratorsNumber)
 //----------------------------------------------------------------------
 
-MonoidFamily::MonoidFamily(string l,DisplayGenerator d,GeneratorsNumber n):label(l),gdisp(d),gnum(n){
+MonoidFamily::MonoidFamily(string l,DisplayGenerator d,GeneratorsNumber n,GeneratorRank r):label(l),gdisp(d),gnum(n),grank(r){
   left_reversing=nullptr;
   right_reversing=nullptr;
   ranked_phi_germ=nullptr;
@@ -354,9 +354,33 @@ MonoidFamily::phi(size_t r,const Word& w,int p){
   return res;
 }
 
+//---------------------------------------
+// MonoidFamily::phi_normal(size_t,Word)
+//---------------------------------------
+
+Word
+MonoidFamily::phi_normal(size_t r,const Word& w){
+  if(r<=1) return w;
+  Array<Word> splitting=phi_splitting(r-1,w);
+  size_t b=splitting.size();
+  for(size_t i=0;i<b;++i){
+    splitting[i]=phi_normal(r-1,splitting[i]);
+    apply_phi(r,splitting[i],b-1-i);
+  }
+  Word res(w.size());
+  size_t ind=0;
+  for(size_t i=0;i<b;++i){
+    Word& temp=splitting[i];
+    for(size_t j=0;j<temp.size();++j){
+      res[ind++]=temp[j];
+    }
+  }
+  return res;
+}
+
 //-------------------------------------
 // MonoidFamily::phi_tail(size_t,Word)
-//-------------*-----------------------
+//-------------------------------------
 
 Word
 MonoidFamily::phi_tail(size_t r,const Word& w){
@@ -408,6 +432,20 @@ MonoidFamily::phi_splitting(size_t r,const Word& w){
   return res_array;
 }
 
+//--------------------------
+// MonoidFamily::rank(Word)
+//--------------------------
+
+size_t
+MonoidFamily::rank(const Word& w){
+  if(w.is_empty()) return 0;
+  size_t r=1;
+  for(size_t i=0;i<w.size();++i){
+    size_t t=grank(w.read(i));
+    if(t>r) r=t;
+  }
+  return r;
+}
 
 //***************
 //* MonoidTrait *

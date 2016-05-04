@@ -200,3 +200,6 @@ DualA.phi_splitting(2,a34)==[a23,a00]
 DualA.phi_splitting(2,a24)==[a13,a00]
 DualA.phi_splitting(2,a14)==[a23,a00,a00]
 DualA.phi_splitting(2,delta3)==[a23,a00,delta2]
+
+# phi-normal-form
+DualA.phi_normal_form(delta3*delta3)==a12*a14*a12*a13*a12*a12
