@@ -51,6 +51,9 @@ size_t ArtinA_gnum(size_t n);
 //! Set left complement for Artin monoid of type A
 int ArtinA_left_sc(const Generator& x,const Generator &y,Generator* comp);
 
+//! Return the rank of an Artin generator of type A
+size_t ArtinA_rank(const Generator& x);
+
 //! Set right complement for Artin monoid of type A
 int ArtinA_right_sc(const Generator& x,const Generator &y,Generator* comp);
 
@@ -75,6 +78,9 @@ size_t DualA_gnum(size_t n);
 
 //! Set left complement for dual monoid of type A
 int DualA_left_sc(const Generator& x,const Generator &y,Generator* comp);
+
+//! Return the rank of an dual generator of type A
+size_t DualA_rank(const Generator& x);
 
 //! Set right complement for dual monoid of type A
 int DualA_right_sc(const Generator& x,const Generator &y,Generator* comp);
@@ -108,11 +114,21 @@ ArtinA_gnum(size_t n){
   return n-1;
 }
 
+inline size_t
+ArtinA_rank(const Generator& x){
+  return abs(x);
+}
+
 inline string
 DualA_disp(const Generator& x){
   if(x==0) return "e";
   if(x>0) return "a"+to_string(get_i(x))+to_string(get_j(x));
   return "A"+to_string(get_i(-x))+to_string(get_j(-x));
+}
+
+inline size_t
+DualA_rank(const Generator& x){
+  return get_j(abs(x))-1;
 }
 
 inline Generator

@@ -48,6 +48,8 @@ typedef int(*SetComplement)(const Generator& x,const Generator& y,Generator* com
 typedef string(*DisplayGenerator)(const Generator& x);
 //! Return the number of generators of the monoid of rank n among a monoid familly
 typedef size_t(*GeneratorsNumber)(size_t n);
+//! Return the rank of a Generator
+typedef size_t(*RankGenerator)(const Generator& x);
 //! Ranked Generator bijection
 typedef Generator(*RankedGeneratorBijection)(size_t r,const Generator& x,int p);
 //! Return a ranked word
@@ -167,11 +169,6 @@ public:
   LeftReversing* left_reversing;
   //! Pointer to a RightReversing
   RightReversing* right_reversing;
-  //! Ranked Garside automorphism germ
-  RankedGeneratorBijection ranked_phi_germ;
-  //! Ranked Garside element factory
-  RankedWordFactory ranked_garside_word_factory;
-  
   //! Extra data
   void* data;
   //! Empty constructor
@@ -180,26 +177,14 @@ public:
   //! Destructor
   ~MonoidTrait();
 
-  //! Apply phi_r^p to the word
-  void apply_phi(size_t r,Word& w,int p=1);
-
   //! Test if two words are equivalent
   bool are_equivalent(const Word& u,const Word& v);
-  
-  //! Return garside_element of rank r
-  Word garside_element(size_t r);
-  
+
   //! Test if the family has a left complement
   bool has_left_complement() const;
    
   //! Test if the family has a right complement
   bool has_right_complement() const;
-
-  //! Test if the family has a Garside automorphism
-  bool has_garside_automorphism() const;
-
-  //! Test if the family has a Garside element
-  bool has_garside_element() const;
   
   //! Test if a is left divisible by b, i.e.,if it exists c such that a=b.c */
   bool is_left_divisible(const Word& a,const Word& b);
@@ -245,18 +230,6 @@ public:
   //! Left reverse the u.v^(-1)
   Word left_reverse(const Word& u,const Word& v);
 
-  //! Return the word obtained under phi_r^p
-  Word phi(size_t r,const Word& w,int p=1);
-
-  //! Return ranked phi-tail of an element
-  Word phi_tail(size_t r,const Word& w);
-
-  //! Return ranked phi-tail of an element together with remainder
-  pair<Word,Word> phi_tail_x(size_t r,const Word& w);
-
-  //! Return the ranked phi-splitting of an element
-  Array<Word> phi_splitting(size_t r,const Word& w);
-  
   //! Return right complement of x and y
   Word right_complement(const Generator& x,const Generator& y);
   
@@ -291,14 +264,7 @@ public:
   void set_left_complement(SetComplement sc);
 
   //! Set right complement
-  void set_right_complement(SetComplement sc);
-
-  //! Set ranked phi germ
-  void set_ranked_phi_germ(RankedGeneratorBijection rpg);
-  
-  //! Set ranked garside word factory
-  void set_ranked_garside_word_factory(RankedWordFactory rgwf);
-  
+  void set_right_complement(SetComplement sc); 
 };
 
 //--------------
@@ -314,6 +280,10 @@ public:
   GeneratorsNumber gnum;
   //! Label of the monoid family
   string label;
+  //! Ranked Garside automorphism germ
+  RankedGeneratorBijection ranked_phi_germ;
+  //! Ranked Garside element factory
+  RankedWordFactory ranked_garside_word_factory;
   
   //! Unique constructor
   MonoidFamily(string l,DisplayGenerator d,GeneratorsNumber n);
@@ -321,11 +291,46 @@ public:
   //! Destructor
   ~MonoidFamily();
 
+  //! Apply phi_r^p to the word
+  void apply_phi(size_t r,Word& w,int p=1);
+  
   //! Display
   string display() const;
+    
+  //! Return garside_element of rank r
+  Word garside_element(size_t r);
   
   //! Return number of generators for rank n
   size_t generators_number(size_t n);
+
+  //! Test if the family has a Garside automorphism
+  bool has_garside_automorphism() const;
+
+  //! Test if the family has a Garside element
+  bool has_garside_element() const;
+  
+  //! Return the word obtained under phi_r^p
+  Word phi(size_t r,const Word& w,int p=1);
+  
+  //! Return ranked phi-tail of an element
+  Word phi_tail(size_t r,const Word& w);
+
+  //! Return ranked phi-tail of an element together with remainder
+  pair<Word,Word> phi_tail_x(size_t r,const Word& w);
+
+  //! Return the ranked phi-splitting of an element
+  Array<Word> phi_splitting(size_t r,const Word& w);
+
+  //! Return rank of a Word
+  size_t rank(const Word& w);
+
+    //! Set ranked phi germ
+  void set_ranked_phi_germ(RankedGeneratorBijection rpg);
+  
+  //! Set ranked garside word factory
+  void set_ranked_garside_word_factory(RankedWordFactory rgwf);
+  
+  
 };
 
 //------
@@ -456,15 +461,17 @@ RightReversing::full_reverse(){
 //--------------
 
 inline
-MonoidFamily::MonoidFamily(string l,DisplayGenerator d,GeneratorsNumber n):label(l),gdisp(d),gnum(n){
-  left_reversing=nullptr;
-  right_reversing=nullptr;
+MonoidFamily::~MonoidFamily(){
 }
-
 
 inline string
 MonoidFamily::display() const{
   return label+" monoid family";
+}
+
+inline Word
+MonoidFamily::garside_element(size_t r){
+  return ranked_garside_word_factory(r);
 }
 
 inline size_t
@@ -472,24 +479,29 @@ MonoidFamily::generators_number(size_t n){
   return gnum(n);
 }
 
-//-------------
-// MonoidTrait
-//-------------
-
-inline Word
-MonoidTrait::garside_element(size_t r){
-  return ranked_garside_word_factory(r);
-}
-
 inline bool
-MonoidTrait::has_garside_element() const{
+MonoidFamily::has_garside_element() const{
   return ranked_garside_word_factory!=nullptr;
 }
 
 inline bool
-MonoidTrait::has_garside_automorphism() const{
+MonoidFamily::has_garside_automorphism() const{
   return ranked_phi_germ!=nullptr;
 }
+
+inline void
+MonoidFamily::set_ranked_phi_germ(RankedGeneratorBijection rpg){
+  ranked_phi_germ=rpg;
+}
+
+inline void
+MonoidFamily::set_ranked_garside_word_factory(RankedWordFactory rgwf){
+  ranked_garside_word_factory=rgwf;
+}
+
+//-------------
+// MonoidTrait
+//-------------
 
 inline bool
 MonoidTrait::has_left_complement() const{
@@ -591,16 +603,6 @@ MonoidTrait::set_left_complement(SetComplement sc){
 inline void
 MonoidTrait::set_right_complement(SetComplement sc){
   right_reversing=new RightReversing(sc);
-}
-
-inline void
-MonoidTrait::set_ranked_phi_germ(RankedGeneratorBijection rpg){
-  ranked_phi_germ=rpg;
-}
-
-inline void
-MonoidTrait::set_ranked_garside_word_factory(RankedWordFactory rgwf){
-  ranked_garside_word_factory=rgwf;
 }
 
 //------

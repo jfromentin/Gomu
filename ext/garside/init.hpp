@@ -39,15 +39,30 @@ string mf_display(void* m);
 //! Delete a MonoidFamily
 void mf_delete(void* m);
 
+//! Return garside element of a given rank
+void* mf_garside_element(void* m,void* r);
+
 //! Return generators number fror rank n
 void* mf_generators_number(void* m,void* n);
+
+//! Return the word under ranked Garside automorphism
+void* mf_phi(void* m,void* r,void* w);
+
+//! Return the word under power of ranked Garside automorphism
+void* mf_phi_power(void* m,void* r,void* w,void* p);
+
+//! Return ranked phi-tail of an element
+void* mf_phi_tail(void* m,void* r,void* w);
+
+//! Return ranked phi-tail of an element together with remainder
+void* mf_phi_tail_x(void* m,void* r,void* w);
+
+//! Return the ranked phi-splitting of an element
+void* mf_phi_splitting(void* m,void* r,void* w);
 
 //***************
 //* MonoidTrait *
 //***************
-
-//! Return garside element of a given rank
-void* mt_garside_element(void* m,void* r);
 
 //! Test is a left divides b
 void* mt_is_left_divisible(void* m,void* a,void* b);
@@ -81,21 +96,6 @@ void* mt_left_lcm_complement(void* m,void* a,void* b);
 
 //! Return left numerator
 void* mt_left_numerator(void* m);
-
-//! Return the word under ranked Garside automorphism
-void* mt_phi(void* m,void* r,void* w);
-
-//! Return the word under power of ranked Garside automorphism
-void* mt_phi_power(void* m,void* r,void* w,void* p);
-
-//! Return ranked phi-tail of an element
-void* mt_phi_tail(void* m,void* r,void* w);
-
-//! Return ranked phi-tail of an element together with remainder
-void* mt_phi_tail_x(void* m,void* r,void* w);
-
-//! Return the ranked phi-splitting of an element
-void* mt_phi_splitting(void* m,void* r,void* w);
 
 //! Left reverse a word
 void* mt_left_reverse(void* m,void* w);
