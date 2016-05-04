@@ -40,12 +40,13 @@ void braids_init(){
   ArtinA_mf.set_left_complement(&ArtinA_left_sc);
   ArtinA_mf.set_right_complement(&ArtinA_right_sc);
   ArtinA_mf.set_ranked_phi_germ(&ArtinA_rpg);
-
+  ArtinA_mf.set_ranked_garside_word_factory(&ArtinA_rgwf);
+  
   DualA_mf.data=(void*)type_DualWordA;
   DualA_mf.set_left_complement(&DualA_left_sc);
   DualA_mf.set_right_complement(&DualA_right_sc);
-  DualA_mf.data=(void*)type_DualWordA;
   DualA_mf.set_ranked_phi_germ(&DualA_rpg);
+  DualA_mf.set_ranked_garside_word_factory(&DualA_rgwf);
 }
 
 //------------------------------------------------
@@ -84,15 +85,30 @@ int ArtinA_right_sc(const Generator& x,const Generator& y,Generator* comp){
   }
 }
 
-//--------------------------------------------
-// Generator ArtinA_rpg(size_t,Generator,int)
-//--------------------------------------------
+//----------------------------------
+// ArtinA_rpg(size_t,Generator,int)
+//----------------------------------
 
 Generator ArtinA_rpg(size_t r,const Generator& x,int p){
   int power=abs(p)%2;
   if(power==0) return x;
   if(x>0) return r-x;
   return -(r+x);
+}
+
+//---------------------
+// ArtinA_rgwf(size_t)
+//---------------------
+
+Word ArtinA_rgwf(size_t r){
+  Word res(r*(r+1)/2);
+  size_t ind=0;
+  for(size_t n=r;n>0;--n){
+    for(size_t i=1;i<=n;++i){
+      res[ind++]=i;
+    }
+  }
+  return res;
 }
 
 //--------------------
@@ -204,9 +220,9 @@ int DualA_right_sc(const Generator& x,const Generator& y,Generator* comp){
   return 1;
 }
 
-//-------------------------------------------
-// Generator DualA_rpg(size_t,Generator,int)
-//-------------------------------------------
+//---------------------------------
+// DualA_rpg(size_t,Generator,int)
+//---------------------------------
 
 Generator DualA_rpg(size_t r,const Generator& x,int p){
   int n=r+1;
@@ -227,3 +243,14 @@ Generator DualA_rpg(size_t r,const Generator& x,int p){
   return sign*generator(i,j);
 }
 
+//--------------------
+// DualA_rgwf(size_t)
+//--------------------
+
+Word DualA_rgwf(size_t r){
+  Word res(r);
+  for(size_t i=0;i<r;++i){
+    res[i]=generator(i+1,i+2);
+  }
+  return res;
+}

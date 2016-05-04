@@ -26,6 +26,16 @@
 
 #define MAX_COMPLEMENT_SIZE 64
 
+//***************************
+//* Early class definitions *
+//***************************
+
+class Reversing;
+class LeftReversing;
+class RightReversing;
+class PresentedMonoid;
+class Word;
+
 //************
 //* Typedefs *
 //************
@@ -40,17 +50,9 @@ typedef string(*DisplayGenerator)(const Generator& x);
 typedef size_t(*GeneratorsNumber)(size_t n);
 //! Ranked Generator bijection
 typedef Generator(*RankedGeneratorBijection)(size_t r,const Generator& x,int p);
-
-//***************************
-//* Early class definitions *
-//***************************
-
-class Reversing;
-class LeftReversing;
-class RightReversing;
-class PresentedMonoid;
-class Word;
-
+//! Return a ranked word
+typedef Word(*RankedWordFactory)(size_t r);
+  
 //********************* 
 //* Class definitions *
 //*********************
@@ -167,6 +169,8 @@ public:
   RightReversing* right_reversing;
   //! Ranked Garside automorphism germ
   RankedGeneratorBijection ranked_phi_germ;
+  //! Ranked Garside element factory
+  RankedWordFactory ranked_garside_word_factory;
   
   //! Extra data
   void* data;
@@ -176,14 +180,23 @@ public:
   //! Destructor
   ~MonoidTrait();
 
+  //! Apply phi_r^p to the word
+  void apply_phi(size_t r,Word& w,int p=1);
+
+  //! Return garside_element of rank r
+  Word garside_element(size_t r);
+  
   //! Test if the family has a left complement
   bool has_left_complement() const;
    
   //! Test if the family has a right complement
   bool has_right_complement() const;
 
-  //! test if the famile has a Garside automorphism
+  //! Test if the family has a Garside automorphism
   bool has_garside_automorphism() const;
+
+  //! Test if the family has a Garside element
+  bool has_garside_element() const;
   
   //! Test if a is left divisible by b, i.e.,if it exists c such that a=b.c */
   bool is_left_divisible(const Word& a,const Word& b);
@@ -230,8 +243,8 @@ public:
   Word left_reverse(const Word& u,const Word& v);
 
   //! Return the word obtained under phi_r^p
-  Word map_phi(size_t r,const Word& w,int p=1);
-  
+  Word phi(size_t r,const Word& w,int p=1);
+
   //! Return right complement of x and y
   Word right_complement(const Generator& x,const Generator& y);
   
@@ -270,6 +283,10 @@ public:
 
   //! Set ranked phi germ
   void set_ranked_phi_germ(RankedGeneratorBijection rpg);
+  
+  //! Set ranked garside word factory
+  void set_ranked_garside_word_factory(RankedWordFactory rgwf);
+  
 };
 
 //--------------
@@ -441,11 +458,19 @@ MonoidFamily::generators_number(size_t n){
 // MonoidTrait
 //-------------
 
-inline
-MonoidTrait::MonoidTrait(){
-  left_reversing=nullptr;
-  right_reversing=nullptr;
-  ranked_phi_germ=nullptr;
+inline Word
+MonoidTrait::garside_element(size_t r){
+  return ranked_garside_word_factory(r);
+}
+
+inline bool
+MonoidTrait::has_garside_element() const{
+  return ranked_garside_word_factory!=nullptr;
+}
+
+inline bool
+MonoidTrait::has_garside_automorphism() const{
+  return ranked_phi_germ!=nullptr;
 }
 
 inline bool
@@ -456,11 +481,6 @@ MonoidTrait::has_left_complement() const{
 inline bool
 MonoidTrait::has_right_complement() const{
   return right_reversing!=nullptr;
-}
-
-inline bool
-MonoidTrait::has_garside_automorphism() const{
-  return ranked_phi_germ!=nullptr;
 }
 
 inline bool
@@ -558,6 +578,11 @@ MonoidTrait::set_right_complement(SetComplement sc){
 inline void
 MonoidTrait::set_ranked_phi_germ(RankedGeneratorBijection rpg){
   ranked_phi_germ=rpg;
+}
+
+inline void
+MonoidTrait::set_ranked_garside_word_factory(RankedWordFactory rgwf){
+  ranked_garside_word_factory=rgwf;
 }
 
 //------

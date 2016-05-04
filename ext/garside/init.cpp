@@ -48,13 +48,21 @@ extern "C"{
   Word x14({generator(1,4)});
   Word x24({generator(2,4)});
   Word x34({generator(3,4)});
+  Word x15({generator(1,5)});
+  Word x25({generator(2,5)});
+  Word x35({generator(3,5)});
+  Word x45({generator(4,5)});
   Word X12({(Generator)(-generator(1,2))});
   Word X13({(Generator)(-generator(1,3))});
   Word X23({(Generator)(-generator(2,3))});
   Word X14({(Generator)(-generator(1,4))});
   Word X24({(Generator)(-generator(2,4))});
   Word X34({(Generator)(-generator(3,4))});
-  
+  Word X15({(Generator)(-generator(1,5))});
+  Word X25({(Generator)(-generator(2,5))});
+  Word X35({(Generator)(-generator(3,5))});
+  Word X45({(Generator)(-generator(4,5))});
+
   void init(){
     braids_init();
   }
@@ -80,6 +88,7 @@ extern "C"{
   
   Gomu::Module::Function member_functions[]={
     //ArtinMonoidFamilyA
+    {"ArtinWordA","garside_element",{"ArtinMonoidFamilyA","Integer"},(void*)mt_garside_element},
     {"Boolean","is_left_divisible",{"ArtinMonoidFamilyA","ArtinWordA","ArtinWordA"},(void*)mt_is_left_divisible},
     {"Tuple","is_left_divisible_x",{"ArtinMonoidFamilyA","ArtinWordA","ArtinWordA"},(void*)mt_is_left_divisible_x},
     {"Boolean","is_right_divisible",{"ArtinMonoidFamilyA","ArtinWordA","ArtinWordA"},(void*)mt_is_right_divisible},
@@ -110,6 +119,7 @@ extern "C"{
     {"ArtinWordA","inverse",{"ArtinWordA"},(void*)word_inverse},
 
     //DualMonoidFamilyA
+    {"DualWordA","garside_element",{"DualMonoidFamilyA","Integer"},(void*)mt_garside_element},
     {"Boolean","is_left_divisible",{"DualMonoidFamilyA","DualWordA","DualWordA"},(void*)mt_is_left_divisible},
     {"Tuple","is_left_divisible_x",{"DualMonoidFamilyA","DualWordA","DualWordA"},(void*)mt_is_left_divisible_x},
     {"Boolean","is_right_divisible",{"DualMonoidFamilyA","DualWordA","DualWordA"},(void*)mt_is_right_divisible},
@@ -165,12 +175,20 @@ extern "C"{
     {"a14","DualWordA",(void*)&x14},
     {"a24","DualWordA",(void*)&x24},
     {"a34","DualWordA",(void*)&x34},
+    {"a15","DualWordA",(void*)&x15},
+    {"a25","DualWordA",(void*)&x25},
+    {"a35","DualWordA",(void*)&x35},
+    {"a45","DualWordA",(void*)&x45},
     {"A12","DualWordA",(void*)&X12},
     {"A13","DualWordA",(void*)&X13},
     {"A23","DualWordA",(void*)&X23},
     {"A14","DualWordA",(void*)&X14},
     {"A24","DualWordA",(void*)&X24},
     {"A34","DualWordA",(void*)&X34},
+    {"A15","DualWordA",(void*)&X15},
+    {"A25","DualWordA",(void*)&X25},
+    {"A35","DualWordA",(void*)&X35},
+    {"A45","DualWordA",(void*)&X45},
     {"ArtinA","ArtinMonoidFamilyA",(void*)&ArtinA_mf},
     {"DualA","DualMonoidFamilyA",(void*)&DualA_mf},
     SYMB_SENTINEL
@@ -180,6 +198,17 @@ extern "C"{
 //*************************
 //* Fonctions definitions *
 //*************************
+
+//-------------------------------------------
+// Word garside_element(MonoidTrait,Integer)
+//-------------------------------------------
+
+void* mt_garside_element(void* m,void* r){
+  MonoidTrait* monoid=(MonoidTrait*)m;
+ if(not monoid->has_garside_element())
+    RuntimeError("Monoid doesn't have Garside element");
+ return (void*)(new Word(monoid->garside_element(Gomu::get_slong(r))));
+}
 
 //--------------------------------------------------
 // Boolean is_left_divisible(MonoidTrait,Word,Word)
@@ -329,8 +358,10 @@ void* mt_left_reverse2(void* m,void* num,void* den){
 
 void* mt_phi(void* m,void* r,void* w){
   MonoidTrait* monoid=(MonoidTrait*)m;
+  if(not monoid->has_garside_automorphism())
+    RuntimeError("Monoid has not Garside automorphism");
   size_t rank=Gomu::get_slong(r);
-  return new Word(monoid->map_phi(rank,*(Word*)w));
+  return new Word(monoid->phi(rank,*(Word*)w));
 }
 
 //--------------------------------------------
@@ -339,9 +370,11 @@ void* mt_phi(void* m,void* r,void* w){
 
 void* mt_phi_power(void* m,void* r,void* w,void* p){
   MonoidTrait* monoid=(MonoidTrait*)m;
+  if(not monoid->has_garside_automorphism())
+    RuntimeError("Monoid has not Garside automorphism");
   size_t rank=Gomu::get_slong(r);
   int power=Gomu::get_slong(p);
-  return new Word(monoid->map_phi(rank,*(Word*)w,power));
+  return new Word(monoid->phi(rank,*(Word*)w,power));
 }
 
 //----------------------------------------------

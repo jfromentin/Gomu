@@ -60,6 +60,9 @@ int ArtinA_right_sc(const Generator& x,const Generator &y,Generator* comp);
 // \param p power to apply
 Generator ArtinA_rpg(size_t r,const Generator& x,int p);
 
+//! Ranked Garside word factory
+Word ArtinA_rgwf(size_t r);
+
 //-----------------
 // Dual of type A
 //-----------------
@@ -81,6 +84,9 @@ int DualA_right_sc(const Generator& x,const Generator &y,Generator* comp);
 // \param x the generator to map
 // \param p power to apply
 Generator DualA_rpg(size_t r,const Generator& x,int p);
+
+//! Ranked Garside word factory
+Word DualA_rgwf(size_t r);
 
 //**********************
 //* Inline definitions *

@@ -1,3 +1,15 @@
+#*******************
+#* Artin of type A *
+#*******************
+
+# Garside element
+
+ArtinA.garside_element(0)==a0
+ArtinA.garside_element(1)==a1
+ArtinA.garside_element(2)==a1*a2*a1
+ArtinA.garside_element(3)==a1*a2*a3*a1*a2*a1
+ArtinA.garside_element(4)==a1*a2*a3*a4*a1*a2*a3*a1*a2*a1
+
 #******************
 #* Dual of type A *
 #******************
@@ -152,3 +164,11 @@ DualA.phi(2,A12)==A23
 DualA.phi(2,A23)==A13
 DualA.phi(2,A13)==A12
 DualA.phi(2,a12*A13)==a23*A12
+
+# Garside element
+
+DualA.garside_element(0)==a00
+DualA.garside_element(1)==a12
+DualA.garside_element(2)==a12*a23
+DualA.garside_element(3)==a12*a23*a34
+DualA.garside_element(4)==a12*a23*a34*a45

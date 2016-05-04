@@ -324,6 +324,16 @@ MonoidFamily::~MonoidFamily(){
 //* MonoidTrait *
 //***************
 
+//----------------------------
+// MonoidTrait::MonoidTrait()
+//----------------------------
+
+MonoidTrait::MonoidTrait(){
+  left_reversing=nullptr;
+  right_reversing=nullptr;
+  ranked_phi_germ=nullptr;
+  ranked_garside_word_factory=nullptr;
+}
 //-----------------------------
 // MonoidTrait::~MonoidTrait()
 //-----------------------------
@@ -331,6 +341,19 @@ MonoidFamily::~MonoidFamily(){
 MonoidTrait::~MonoidTrait(){
   if(left_reversing!=nullptr) delete left_reversing;
   if(right_reversing!=nullptr) delete right_reversing;
+}
+
+
+//-----------------------------------------
+// MonoidTrait::apply_phi(size_t,Word,int)
+//------------------------------------------
+
+void
+MonoidTrait::apply_phi(size_t r,Word& w,int p){
+  size_t s=w.size();
+  for(size_t i=0;i<s;++i){
+    w[i]=ranked_phi_germ(r,w[i],p);
+  }
 }
 
 //-----------------------------------------------------------
@@ -395,12 +418,12 @@ MonoidTrait::left_gcd_x(const Word& a,const Word& b){
   return pair<Word,Word>(left_numerator(),div);
 }
 
-//---------------------------------------
-// MonoidTrait::map_phi(size_t,Word,int)
-//---------------------------------------
+//-----------------------------------
+// MonoidTrait::phi(size_t,Word,int)
+//-----------------------------------
 
 Word
-MonoidTrait::map_phi(size_t r,const Word& w,int p){
+MonoidTrait::phi(size_t r,const Word& w,int p){
   size_t s=w.size();
   Word res(s);
   for(size_t i=0;i<s;++i){

@@ -46,6 +46,9 @@ void* mf_generators_number(void* m,void* n);
 //* MonoidTrait *
 //***************
 
+//! Return garside element of a given rank
+void* mt_garside_element(void* m,void* r);
+
 //! Test is a left divides b
 void* mt_is_left_divisible(void* m,void* a,void* b);
 
