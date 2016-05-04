@@ -347,7 +347,9 @@ namespace Gomu{
     interpreter.add_operator("!=","operator!=",opBinary,8);
     interpreter.add_operator("+","operator+",opBinary,4);
     interpreter.add_operator("-","operator-",opBinary,4);
-    interpreter.add_operator("*","operator*",opBinary,3);
+    interpreter.add_operator("*","operator*",opBinary,5);
+    interpreter.add_operator("/","operator/",opBinary,5);
+    interpreter.add_operator("%","operator%",opBinary,5);
     interpreter.add_operator("::","operator::",opBinary,1);
     interpreter.add_operator("!","factorial",opPostUnitary,2);
     context.add_contextual_function("Void","load",{"String"},(void*)load_module);

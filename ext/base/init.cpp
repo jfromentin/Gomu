@@ -32,6 +32,12 @@ extern "C"{
   Gomu::Module::Function functions[]={
     {"Integer","len",{"String"},(void*)string_len},
     {"Integer","len",{"Array"},(void*)array_len},
+    {"Integer","negate",{"Integer"},(void*)integer_negate},
+    {"Integer","operator+",{"Integer","Integer"},(void*)integer_add},
+    {"Integer","operator*",{"Integer","Integer"},(void*)integer_mul},
+    {"Integer","operator/",{"Integer","Integer"},(void*)integer_quo},
+    {"Integer","operator%",{"Integer","Integer"},(void*)integer_rem},
+    {"Integer","operator-",{"Integer","Integer"},(void*)integer_sub},
     FUNC_SENTINEL
   };
   

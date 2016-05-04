@@ -21,3 +21,20 @@
 
 using namespace Gomu;
 
+//!Return the sum of two integers
+void* integer_add(void*,void*);
+
+//!Return the multiplication of two integers
+void* integer_mul(void*,void*);
+
+//!Return the opposite of an integer
+void* integer_negate(void*);
+
+//!Return the quotient of two integers
+void* integer_quo(void*,void*);
+
+//!Return the remainder of two integers
+void* integer_rem(void*,void*);
+
+//!Return the substraction of two integers
+void* integer_sub(void*,void*);

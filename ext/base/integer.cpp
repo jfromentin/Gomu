@@ -18,3 +18,69 @@
  */
 
 #include "integer.hpp"
+
+//------------------------------
+// Integer add(Integer,Integer)
+//------------------------------
+
+void* integer_add(void* a,void* b){
+  fmpz* res=new fmpz;
+  fmpz_init(res);
+  fmpz_add(res,(fmpz*)a,(fmpz*)b);
+  return (void*)res;
+}
+
+//------------------------------
+// Integer mul(Integer,Integer)
+//------------------------------
+
+void* integer_mul(void* a,void* b){
+  fmpz* res=new fmpz;
+  fmpz_init(res);
+  fmpz_mul(res,(fmpz*)a,(fmpz*)b);
+  return (void*)res;
+}
+
+//-------------------------
+// Integer negate(Integer)
+//-------------------------
+
+void* integer_negate(void* a){
+  fmpz* res=new fmpz;
+  fmpz_init(res);
+  fmpz_neg(res,(fmpz*)a);
+  return (void*)res;
+}
+
+//------------------------------
+// Integer quo(Integer,Integer)
+//------------------------------
+
+void* integer_quo(void* a,void* b){
+  fmpz* res=new fmpz;
+  fmpz_init(res);
+  fmpz_fdiv_q(res,(fmpz*)a,(fmpz*)b);
+  return (void*)res;
+}
+
+//------------------------------
+// Integer rem(Integer,Integer)
+//------------------------------
+
+void* integer_rem(void* a,void* b){
+  fmpz* res=new fmpz;
+  fmpz_init(res);
+  fmpz_fdiv_r(res,(fmpz*)a,(fmpz*)b);
+  return (void*)res;
+}
+
+//------------------------------
+// Integer sub(Integer,Integer)
+//------------------------------
+
+void* integer_sub(void* a,void* b){
+  fmpz* res=new fmpz;
+  fmpz_init(res);
+  fmpz_sub(res,(fmpz*)a,(fmpz*)b);
+  return (void*)res;
+}
