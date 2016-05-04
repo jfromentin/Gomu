@@ -395,6 +395,20 @@ MonoidTrait::left_gcd_x(const Word& a,const Word& b){
   return pair<Word,Word>(left_numerator(),div);
 }
 
+//---------------------------------------
+// MonoidTrait::map_phi(size_t,Word,int)
+//---------------------------------------
+
+Word
+MonoidTrait::map_phi(size_t r,const Word& w,int p){
+  size_t s=w.size();
+  Word res(s);
+  for(size_t i=0;i<s;++i){
+    res[i]=ranked_phi_germ(r,w[i],p);
+  }
+  return res;
+}
+
 //----------------------------------------------------
 // MonoidTrait::right_complement(Generator,Generator)
 //----------------------------------------------------

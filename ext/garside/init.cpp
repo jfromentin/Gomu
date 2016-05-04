@@ -93,6 +93,8 @@ extern "C"{
     {"ArtinWordA","left_numerator",{"ArtinMonoidFamilyA"},(void*)mt_left_numerator},
     {"ArtinWordA","left_reverse",{"ArtinMonoidFamilyA","ArtinWordA"},(void*)mt_left_reverse},
     {"ArtinWordA","left_reverse",{"ArtinMonoidFamilyA","ArtinWordA","ArtinWordA"},(void*)mt_left_reverse2},
+    {"ArtinWordA","phi",{"ArtinMonoidFamilyA","Integer","ArtinWordA"},(void*)mt_phi},
+    {"ArtinWordA","phi",{"ArtinMonoidFamilyA","Integer","ArtinWordA","Integer"},(void*)mt_phi_power},
     {"ArtinWordA","right_complement",{"ArtinMonoidFamilyA","ArtinWordA","ArtinWordA"},(void*)mt_right_complement},
     {"ArtinWordA","right_denominator",{"ArtinMonoidFamilyA"},(void*)mt_right_denominator},
     {"ArtinWordA","right_lcm",{"ArtinMonoidFamilyA","ArtinWordA","ArtinWordA"},(void*)mt_right_lcm},
@@ -121,6 +123,8 @@ extern "C"{
     {"DualWordA","left_numerator",{"DualMonoidFamilyA"},(void*)mt_left_numerator},
     {"DualWordA","left_reverse",{"DualMonoidFamilyA","DualWordA"},(void*)mt_left_reverse},
     {"DualWordA","left_reverse",{"DualMonoidFamilyA","DualWordA","DualWordA"},(void*)mt_left_reverse2},
+    {"DualWordA","phi",{"DualMonoidFamilyA","Integer","DualWordA"},(void*)mt_phi},
+    {"DualWordA","phi",{"DualMonoidFamilyA","Integer","DualWordA","Integer"},(void*)mt_phi_power},
     {"DualWordA","right_complement",{"DualMonoidFamilyA","DualWordA","DualWordA"},(void*)mt_right_complement},
     {"DualWordA","right_denominator",{"DualMonoidFamilyA"},(void*)mt_right_denominator},
     {"DualWordA","right_lcm",{"DualMonoidFamilyA","DualWordA","DualWordA"},(void*)mt_right_lcm},
@@ -168,7 +172,7 @@ extern "C"{
     {"A24","DualWordA",(void*)&X24},
     {"A34","DualWordA",(void*)&X34},
     {"ArtinA","ArtinMonoidFamilyA",(void*)&ArtinA_mf},
-    {"DualA","DualMonoidFamilyA",(void*)&dualA_mf},
+    {"DualA","DualMonoidFamilyA",(void*)&DualA_mf},
     SYMB_SENTINEL
   };
 };
@@ -239,7 +243,7 @@ void* mt_left_complement(void* m,void* a,void* b){
 
 void* mt_left_denominator(void* m){
   MonoidTrait* monoid=(MonoidTrait*)m;
-    if(not monoid->is_left_complemented())
+    if(not monoid->has_left_complement())
     RuntimeError("Monoid is not left complemented");
   return new Word(monoid->left_denominator());
 }
@@ -291,7 +295,7 @@ void* mt_left_lcm_complement(void* m,void* a,void *b){
 
 void* mt_left_numerator(void* m){
   MonoidTrait* monoid=(MonoidTrait*)m;
-  if(not monoid->is_left_complemented())
+  if(not monoid->has_left_complement())
     RuntimeError("Monoid is not left complemented");
   return new Word(monoid->left_numerator());
 }
@@ -302,7 +306,7 @@ void* mt_left_numerator(void* m){
 
 void* mt_left_reverse(void* m,void* w){
   MonoidTrait* monoid=(MonoidTrait*)m;
-  if(not monoid->is_left_complemented())
+  if(not monoid->has_left_complement())
     RuntimeError("Monoid is not left complemented");
   return (void*)new Word(monoid->left_reverse(*(Word*)w));
 }
@@ -313,9 +317,31 @@ void* mt_left_reverse(void* m,void* w){
 
 void* mt_left_reverse2(void* m,void* num,void* den){
   MonoidTrait* monoid=(MonoidTrait*)m;
-  if(not monoid->is_left_complemented())
+  if(not monoid->has_left_complement())
     RuntimeError("Monoid is not left complemented");
   return (void*)new Word(monoid->left_reverse(*(Word*)num,*(Word*)den));
+}
+
+
+//------------------------------------
+// Word phi(MonoidTrait,Integer,Word)
+//------------------------------------
+
+void* mt_phi(void* m,void* r,void* w){
+  MonoidTrait* monoid=(MonoidTrait*)m;
+  size_t rank=Gomu::get_slong(r);
+  return new Word(monoid->map_phi(rank,*(Word*)w));
+}
+
+//--------------------------------------------
+// Word phi(MonoidTrait,Integer,Word,Integer)
+//--------------------------------------------
+
+void* mt_phi_power(void* m,void* r,void* w,void* p){
+  MonoidTrait* monoid=(MonoidTrait*)m;
+  size_t rank=Gomu::get_slong(r);
+  int power=Gomu::get_slong(p);
+  return new Word(monoid->map_phi(rank,*(Word*)w,power));
 }
 
 //----------------------------------------------
@@ -336,7 +362,7 @@ void* mt_right_complement(void* m,void* a,void* b){
 
 void* mt_right_denominator(void* m){
   MonoidTrait* monoid=(MonoidTrait*)m;
-  if(not monoid->is_right_complemented())
+  if(not monoid->has_right_complement())
     RuntimeError("Monoid is not right complemented");
   return new Word(monoid->right_denominator());
 }
@@ -388,7 +414,7 @@ void* mt_right_lcm_complement(void* m,void* a,void *b){
 
 void* mt_right_numerator(void* m){
   MonoidTrait* monoid=(MonoidTrait*)m;
-  if(not monoid->is_right_complemented())
+  if(not monoid->has_right_complement())
     RuntimeError("Monoid is not right complemented");
   return new Word(monoid->right_numerator());
 }
@@ -399,7 +425,7 @@ void* mt_right_numerator(void* m){
 
 void* mt_right_reverse(void* m,void* w){
   MonoidTrait* monoid=(MonoidTrait*)m;
-  if(not monoid->is_right_complemented())
+  if(not monoid->has_right_complement())
     RuntimeError("Monoid is not right complemented");
   return (void*)new Word(monoid->right_reverse(*(Word*)w));
 }
@@ -410,7 +436,7 @@ void* mt_right_reverse(void* m,void* w){
 
 void* mt_right_reverse2(void* m,void* den,void* num){
   MonoidTrait* monoid=(MonoidTrait*)m;
-  if(not monoid->is_right_complemented())
+  if(not monoid->has_right_complement())
     RuntimeError("Monoid is not right complemented");
   return (void*)new Word(monoid->right_reverse(*(Word*)den,*(Word*)num));
 }

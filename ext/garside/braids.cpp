@@ -25,7 +25,7 @@
 //******************
 
 MonoidFamily ArtinA_mf("Artin A-type",ArtinA_disp,ArtinA_gnum);
-MonoidFamily dualA_mf("Dual A-type",DualA_disp,DualA_gnum);
+MonoidFamily DualA_mf("Dual A-type",DualA_disp,DualA_gnum);
 
 //***********************
 //* Auxiliary functions *
@@ -36,12 +36,16 @@ MonoidFamily dualA_mf("Dual A-type",DualA_disp,DualA_gnum);
 //---------------
 
 void braids_init(){
+  ArtinA_mf.data=(void*)type_ArtinWordA;
   ArtinA_mf.set_left_complement(&ArtinA_left_sc);
   ArtinA_mf.set_right_complement(&ArtinA_right_sc);
-  ArtinA_mf.data=(void*)type_ArtinWordA;
-  dualA_mf.set_left_complement(&DualA_left_sc);
-  dualA_mf.set_right_complement(&DualA_right_sc);
-  dualA_mf.data=(void*)type_DualWordA;
+  ArtinA_mf.set_ranked_phi_germ(&ArtinA_rpg);
+
+  DualA_mf.data=(void*)type_DualWordA;
+  DualA_mf.set_left_complement(&DualA_left_sc);
+  DualA_mf.set_right_complement(&DualA_right_sc);
+  DualA_mf.data=(void*)type_DualWordA;
+  DualA_mf.set_ranked_phi_germ(&DualA_rpg);
 }
 
 //------------------------------------------------
@@ -78,6 +82,17 @@ int ArtinA_right_sc(const Generator& x,const Generator& y,Generator* comp){
     comp[0]=y;
     return 1;
   }
+}
+
+//--------------------------------------------
+// Generator ArtinA_rpg(size_t,Generator,int)
+//--------------------------------------------
+
+Generator ArtinA_rpg(size_t r,const Generator& x,int p){
+  int power=abs(p)%2;
+  if(power==0) return x;
+  if(x>0) return r-x;
+  return -(r+x);
 }
 
 //--------------------
@@ -188,3 +203,27 @@ int DualA_right_sc(const Generator& x,const Generator& y,Generator* comp){
   comp[0]=y;
   return 1;
 }
+
+//-------------------------------------------
+// Generator DualA_rpg(size_t,Generator,int)
+//-------------------------------------------
+
+Generator DualA_rpg(size_t r,const Generator& x,int p){
+  int n=r+1;
+  int power=p%n;
+  if(power<0) power+=n;
+  int sign,absx;
+  if(x>0){
+    sign=1;
+    absx=x;
+  }
+  else{
+    sign=-1;
+    absx=-x;
+  }
+  int i=(get_i(absx)-1+power)%n+1;
+  int j=(get_j(absx)-1+power)%n+1;
+  if(i>j) swap(i,j);
+  return sign*generator(i,j);
+}
+

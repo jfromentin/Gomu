@@ -79,6 +79,12 @@ void* mt_left_lcm_complement(void* m,void* a,void* b);
 //! Return left numerator
 void* mt_left_numerator(void* m);
 
+//! Return the word under ranked Garside automorphism
+void* mt_phi(void* m,void* r,void* w);
+
+//! Return the word under power of ranked Garside automorphism
+void* mt_phi_power(void* m,void* r,void* w,void* p);
+
 //! Left reverse a word
 void* mt_left_reverse(void* m,void* w);
 

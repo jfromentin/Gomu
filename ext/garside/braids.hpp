@@ -26,7 +26,7 @@
 //******************
 
 extern MonoidFamily ArtinA_mf;
-extern MonoidFamily dualA_mf;
+extern MonoidFamily DualA_mf;
 
 //***********************************
 //* Auxiliary functions declaration *
@@ -54,6 +54,12 @@ int ArtinA_left_sc(const Generator& x,const Generator &y,Generator* comp);
 //! Set right complement for Artin monoid of type A
 int ArtinA_right_sc(const Generator& x,const Generator &y,Generator* comp);
 
+//! Ranked phi germ for Artin monoid of type A
+// \param r the rank
+// \param x the generator to map
+// \param p power to apply
+Generator ArtinA_rpg(size_t r,const Generator& x,int p);
+
 //-----------------
 // Dual of type A
 //-----------------
@@ -70,6 +76,11 @@ int DualA_left_sc(const Generator& x,const Generator &y,Generator* comp);
 //! Set right complement for dual monoid of type A
 int DualA_right_sc(const Generator& x,const Generator &y,Generator* comp);
 
+//! Ranked phi germ for Artin monoid of type A
+// \param r the rank
+// \param x the generator to map
+// \param p power to apply
+Generator DualA_rpg(size_t r,const Generator& x,int p);
 
 //**********************
 //* Inline definitions *

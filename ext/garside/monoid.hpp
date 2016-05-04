@@ -38,6 +38,8 @@ typedef int(*SetComplement)(const Generator& x,const Generator& y,Generator* com
 typedef string(*DisplayGenerator)(const Generator& x);
 //! Return the number of generators of the monoid of rank n among a monoid familly
 typedef size_t(*GeneratorsNumber)(size_t n);
+//! Ranked Generator bijection
+typedef Generator(*RankedGeneratorBijection)(size_t r,const Generator& x,int p);
 
 //***************************
 //* Early class definitions *
@@ -163,7 +165,9 @@ public:
   LeftReversing* left_reversing;
   //! Pointer to a RightReversing
   RightReversing* right_reversing;
-
+  //! Ranked Garside automorphism germ
+  RankedGeneratorBijection ranked_phi_germ;
+  
   //! Extra data
   void* data;
   //! Empty constructor
@@ -172,19 +176,22 @@ public:
   //! Destructor
   ~MonoidTrait();
 
-  //! Test if the family is left complemented
-  bool is_left_complemented() const;
+  //! Test if the family has a left complement
+  bool has_left_complement() const;
+   
+  //! Test if the family has a right complement
+  bool has_right_complement() const;
 
+  //! test if the famile has a Garside automorphism
+  bool has_garside_automorphism() const;
+  
   //! Test if a is left divisible by b, i.e.,if it exists c such that a=b.c */
   bool is_left_divisible(const Word& a,const Word& b);
 
   //! Return a Couple (f,c) such that f equals true if a is left divisible by b,
   //! i.e.,if it exists c such that a=b.c 
   pair <bool,Word> is_left_divisible_x(const Word& a,const Word& b);
-  
-  //! Test if the family is right complemented
-  bool is_right_complemented() const;
-
+ 
   //! Test if a is right divisible by b, i.e.,if it exists c such that a=c.b
   bool is_right_divisible(const Word& a,const Word& b);
 
@@ -222,6 +229,9 @@ public:
   //! Left reverse the u.v^(-1)
   Word left_reverse(const Word& u,const Word& v);
 
+  //! Return the word obtained under phi_r^p
+  Word map_phi(size_t r,const Word& w,int p=1);
+  
   //! Return right complement of x and y
   Word right_complement(const Generator& x,const Generator& y);
   
@@ -257,6 +267,9 @@ public:
 
   //! Set right complement
   void set_right_complement(SetComplement sc);
+
+  //! Set ranked phi germ
+  void set_ranked_phi_germ(RankedGeneratorBijection rpg);
 };
 
 //--------------
@@ -432,11 +445,22 @@ inline
 MonoidTrait::MonoidTrait(){
   left_reversing=nullptr;
   right_reversing=nullptr;
+  ranked_phi_germ=nullptr;
 }
 
 inline bool
-MonoidTrait::is_left_complemented() const{
+MonoidTrait::has_left_complement() const{
   return left_reversing!=nullptr;
+}
+
+inline bool
+MonoidTrait::has_right_complement() const{
+  return right_reversing!=nullptr;
+}
+
+inline bool
+MonoidTrait::has_garside_automorphism() const{
+  return ranked_phi_germ!=nullptr;
 }
 
 inline bool
@@ -449,11 +473,6 @@ inline bool
 MonoidTrait::is_right_divisible(const Word& a,const Word& b){
   left_reversing->set_word(a,b);
   return left_reversing->check_positivity();
-}
-
-inline bool
-MonoidTrait::is_right_complemented() const{
-  return right_reversing!=nullptr;
 }
 
 inline Word
@@ -536,6 +555,10 @@ MonoidTrait::set_right_complement(SetComplement sc){
   right_reversing=new RightReversing(sc);
 }
 
+inline void
+MonoidTrait::set_ranked_phi_germ(RankedGeneratorBijection rpg){
+  ranked_phi_germ=rpg;
+}
 
 //------
 // Word

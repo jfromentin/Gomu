@@ -134,3 +134,21 @@ DualA.is_right_divisible_x(a12*a23,a23)==(true,a12)
 DualA.is_right_divisible_x(a12*a23,a13)==(true,a23)
 DualA.is_right_divisible_x(a12*a23,a14)==(false,a00)
 DualA.is_right_divisible_x(a12*a23,a12*a12)==(false,a00)
+
+# Garise automorphism
+DualA.phi(2,a12)==a23
+DualA.phi(2,a23)==a13
+DualA.phi(2,a13)==a12
+DualA.phi(2,a12,2)==a13
+DualA.phi(2,a23,2)==a12
+DualA.phi(2,a13,2)==a23
+DualA.phi(2,a12,-1)==a13
+DualA.phi(2,a23,-1)==a12
+DualA.phi(2,a13,-1)==a23
+DualA.phi(2,a12,-4)==a13
+DualA.phi(2,a23,-4)==a12
+DualA.phi(2,a13,-4)==a23
+DualA.phi(2,A12)==A23
+DualA.phi(2,A23)==A13
+DualA.phi(2,A13)==A12
+DualA.phi(2,a12*A13)==a23*A12
